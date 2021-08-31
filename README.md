@@ -24,7 +24,7 @@ Unit-тесты могут являться критически важными 
 Рекомендуемые этапы выполнения задачи:
 
 * Установка компилятора С++, например, [Microsoft Visual Studio Build Tools](https://visualstudio.microsoft.com/ru/downloads/). Бесплатная версия Visual Studio - Community Edition
-* Установка Visual Studio Code (если необходимо) и вспомогательные plug-ins
+* Установка [Visual Studio Code](https://code.visualstudio.com/download) (если необходимо) и вспомогательные plug-ins
 * Установка CMake
 * Установка Google Test
 * Установка Google Benchmark
@@ -35,3 +35,11 @@ Unit-тесты могут являться критически важными 
 * Разработка скриптов для тестирования эффективности кода (Benchmarking)
 * Сравнение вариантов кода. Оценка эффективности кода
 * Документирование результатов
+
+## Выбор среды разработки
+
+Microsoft Visual Studio Community Edition можно рассматривать как стандарт де-факто для операционных систем семейства Windows. Также продукт поддерживается на MacOS.
+
+При необходимости разработки кода под Linux имеет смысл выбрать либо Visual Studio Code, либо [Qt Creator](https://www.qt.io/product/development-tools).
+
+Сильная сторона Visual Studio Code - огромное количество plug-ins, значительно упрощающих разработку кода.
