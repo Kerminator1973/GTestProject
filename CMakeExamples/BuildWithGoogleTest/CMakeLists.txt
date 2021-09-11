@@ -46,7 +46,7 @@ if(ENABLE_UNIT_TESTS)
     # Prevent GoogleTest from using PThreads
     set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
 
-    # adds the targers: gtest, gtest_main, gmock, gmock_main
+    # adds the targets: gtest, gtest_main, gmock, gmock_main
     add_subdirectory(
       ${googletest_SOURCE_DIR}
       ${googletest_BINARY_DIR}
