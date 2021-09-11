@@ -115,3 +115,5 @@ endif()
 ```
 
 Тесты считаются выполненными, если "cpp_test" завершается с кодом 0. Любой другой код сигнализирует об ошибке выполнения Unit-тестов.
+
+Дополнительная статья [Building GoogleTest and GoogleMock directly in a CMake project](https://crascit.com/2015/07/25/cmake-gtest/).
