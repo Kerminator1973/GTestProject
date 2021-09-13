@@ -200,7 +200,7 @@ Shadow bytes around the buggy address: …
 
 Причина, по которой не был собран msan-example – у компиляторов GNU 7.5 немного другой набор имен поддерживаемых санитайзеров: https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 
-На RPi 3 установлен gcc 8.3, но проекты tsan и msan не собрались. Исполняемый модуль asan-example собрался, но не заработал из-за отсутствия необходимой библиотеки. Я добавить ключ сборки -static-libasan и приложение прекрасно отработало:
+На RPi 3 установлен gcc 8.3, но проекты tsan и msan не собрались. Исполняемый модуль asan-example собрался, но не заработал из-за отсутствия необходимой библиотеки. После того, как был добавлен ключ сборки -static-libasan приложение прекрасно отработало:
 
 ```
 set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer -static-libasan")
