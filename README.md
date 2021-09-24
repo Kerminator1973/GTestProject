@@ -10,7 +10,7 @@ Unit-тесты могут являться критически важными 
 
 В качестве инструментов организации Unit-тестов рекомендуется использовать библиотеку [Google Test](https://github.com/google/googletest). Для сравнения эффективности разных вариантов реализации алгоритмов на C++ рекомендуется использовать [Google Benchmark](https://github.com/google/benchmark).
 
-Рекомендуются к ознакомлению [рецепт из книги](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-04) Rodovan Bast и Roberto Di Remigio, связанные с разработкой Unit-тестов.
+Рекомендуется к ознакомлению [рецепт из книги](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-04) Rodovan Bast и Roberto Di Remigio, связанный с разработкой Unit-тестов.
 
 Разработчику на C++ предоставляются исходные тексты уже существующего компонента, либо программа методика испытаний (ПМИ) компонента планируемого к разработке.
 
