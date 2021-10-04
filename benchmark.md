@@ -85,11 +85,19 @@ cmake --build .
 По результатам выполнения тестов Google Benchmark выдает следующие данные:
 
 ```
----------------------------------------------------------
-Benchmark                  Time           CPU Iterations
----------------------------------------------------------
-BM_fastFuncReturn      16327 ns      16392 ns      44800
-BM_slowFuncReturn      17499 ns      16881 ns      40727
+Run on (4 X 3192.64 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x4)
+  L1 Instruction 32 KiB (x4)
+  L2 Unified 256 KiB (x4)
+  L3 Unified 6144 KiB (x1)
+Load Average: 0.19, 0.10, 0.09
+***WARNING*** Library was built as DEBUG. Timings may be affected.
+------------------------------------------------------------
+Benchmark                  Time             CPU   Iterations
+------------------------------------------------------------
+BM_StringCreation       5.59 ns         5.59 ns     90980605
+BM_StringCopy           23.3 ns         23.3 ns     30095881
 ```
 
 Колонка **Benchmark** указывается имя теста. Часто один и тот же алгоритм кодируют разными способами, а Google Benchmart позволяет установить, какой из вариантов работает более эффективно.
