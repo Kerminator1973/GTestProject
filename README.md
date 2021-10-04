@@ -10,7 +10,7 @@ Unit-тесты могут являться критически важными 
 
 В качестве инструментов организации Unit-тестов рекомендуется использовать библиотеку [Google Test](https://github.com/google/googletest). Для сравнения эффективности разных вариантов реализации алгоритмов на C++ рекомендуется использовать [Google Benchmark](https://github.com/google/benchmark).
 
-Рекомендуется к ознакомлению [рецепт из книги](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-04) Rodovan Bast и Roberto Di Remigio, связанный с разработкой Unit-тестов. Так же кажется разумным озакомиться с книгой **Hands-On: Design Patterns with C++** by Fedor G. Pikus. В отдельной [статье](benchmark.md) приведены настройки Google Benchmark.
+Рекомендуется к ознакомлению [рецепт из книги](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-04) Rodovan Bast и Roberto Di Remigio, связанный с разработкой Unit-тестов. Так же кажется разумным озакомиться с книгой **Hands-On: Design Patterns with C++** by Fedor G. Pikus.
 
 Разработчику на C++ предоставляются исходные тексты уже существующего компонента, либо программа методика испытаний (ПМИ) компонента планируемого к разработке.
 
@@ -27,7 +27,7 @@ Unit-тесты могут являться критически важными 
 * Установка [Visual Studio Code](https://code.visualstudio.com/download) (если необходимо) и вспомогательные plug-ins
 * Установка CMake
 * Установка Google Test
-* Установка Google Benchmark
+* Установка [Google Benchmark](benchmark.md)
 * Ознакомление и сборка [рецепта из книги](https://github.com/dev-cafe/cmake-cookbook/blob/v1.0/chapter-04/recipe-03/)
 * Анализ исходных текстов предоставленного компонента
 * Разработка плана тестирования
