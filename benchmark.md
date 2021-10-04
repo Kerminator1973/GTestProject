@@ -33,7 +33,7 @@ BENCHMARK_MAIN();
 g++ ./benchtest.cpp -std=c++11 -isystem benchmark/include -L~/benchmark/build/src -lbenchmark -lpthread -o benchtest
 ```
 
-Типовой скрипт CMake для сборки проекта (под Linux) с использование Google Benchmark:
+Для использования совместно с CMake, должен быть установлен инструмент [Google Test](https://github.com/google/googletest). Типовой скрипт CMake для сборки проекта (под Linux) с использование Google Benchmark:
 
 ``` cmake
 cmake_minimum_required(VERSION 3.10)
@@ -82,7 +82,6 @@ cmake ../
 make
 make test
 ```
-
 
 ## Объяснение метрик
 
