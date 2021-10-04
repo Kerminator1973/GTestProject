@@ -4,7 +4,7 @@
 
 ## Настройка проекта
 
-Пример измеряемого кода:
+Пример измеряемого кода, файл "benchtest.cpp":
 
 ``` cpp
 #include <benchmark/benchmark.h>
@@ -33,14 +33,12 @@ BENCHMARK_MAIN();
 g++ ./benchtest.cpp -std=c++11 -isystem benchmark/include -L~/benchmark/build/src -lbenchmark -lpthread -o benchtest
 ```
 
-Для использования совместно с CMake, должен быть установлен инструмент [Google Test](https://github.com/google/googletest). Типовой скрипт CMake для сборки проекта (под Linux) с использование Google Benchmark:
+Для использования совместно с CMake, должен быть установлен инструмент [Google Test](https://github.com/google/googletest). Типовой скрипт CMake для сборки проекта (под Linux) с использование Google Benchmark, файл "CMakeLists.txt":
 
 ``` cmake
 cmake_minimum_required(VERSION 3.10)
 
-project(TestBoostAsIO)
-
-add_subdirectory(CommPort)
+project(benchtest)
 
 # Hints: для того, чтобы find_package смог найти Boost, который находится по не стандартному пути
 set( BOOST_ROOT $ENV{HOME}/boost/current/ )			# Preferred installation prefix.
@@ -57,7 +55,7 @@ find_package(benchmark)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lbenchmark -std=c++11")
 
 add_executable(${PROJECT_NAME}
-    "main.cpp")
+    "benchtest.cpp")
 
 # Трассируем результаты поиска в консоль
 message("Boost include directory: " ${Boost_INCLUDE_DIRS})
@@ -70,17 +68,16 @@ target_include_directories( ${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 # Подключаем к проекту найденную библиотеку Google Benchmark
-target_link_libraries(${PROJECT_NAME} CommPort)
 target_link_libraries(${PROJECT_NAME} benchmark)
 ```
 
-Сборка и запуск на исполнение:
+Сборка и запуск на исполнение из подкаталога с файлами "CMakeLists.txt" и "benchtest.cpp":
 
 ```
 mkdir build && cd build
-cmake ../
-make
-make test
+cmake ..
+cmake --build .
+./benchtest
 ```
 
 ## Объяснение метрик
