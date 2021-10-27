@@ -107,3 +107,28 @@ BM_StringCopy           23.3 ns         23.3 ns     30095881
 Колонка **CPU** означает "_The user-cpu time and system-cpu time_", т.е. время непосредственно затраченное на выполнение кода теста.
 
 **Iterations** - общее количество выполненных итераций.
+
+## Дополнительные возможности
+
+**Benchmark** позволяет выполнять функцию в нескольких потоках, например:
+
+``` cpp
+BENCHMARK(BM_Empty)->Threads(4);
+...
+BENCHMARK(BM_Empty)->Threads(1)->UseRealTime();
+```
+
+Подобные тесты позволяют оценить падение эффективности из-за межпоточной синхронизации.
+
+```
+Benchmark Time CPU Iterations
+----------------------------------------------------------------------------
+BM_Empty/threads:1 2 ns 2 ns 418132308
+BM_Empty/threads:2 1 ns 2 ns 418901068
+BM_Empty/threads:4 0 ns 2 ns 394432372
+BM_Empty/real_time/threads:1 2 ns 2 ns 418057380
+BM_Empty/real_time/threads:2 1 ns 2 ns 836633562
+BM_Empty/real_time/threads:4 0 ns 2 ns 1621747004
+```
+
+Продолжительность выполнения кода является суммой по всем потоках.
