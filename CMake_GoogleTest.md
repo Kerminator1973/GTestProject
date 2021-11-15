@@ -118,6 +118,8 @@ endif()
 
 Дополнительная статья [Building GoogleTest and GoogleMock directly in a CMake project](https://crascit.com/2015/07/25/cmake-gtest/).
 
+[Пример](.\Contributors\baston\CMake_GoogleTest\README.md) выполнения задачи разработчиком baston доступен в данном репозитарии.
+
 # Sanitizers
 
 В современных компиляторах (clang и gcc) существует прекрасная функциональная особенность, позволяющая подключать дополнительные инструментальные средства, в частности – санитайзеры, инструменты автоматического поиска ошибок в коде в процессе исполнения. Ссылка на библиотеку: https://github.com/google/sanitizers
