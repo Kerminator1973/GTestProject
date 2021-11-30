@@ -122,6 +122,80 @@ endif()
 
 [Пример](.\Contributors\baston\CMake_GoogleTest\README.md) выполнения задачи разработчиком baston доступен в данном репозитарии.
 
+## Автономный вызов приложения с тестами
+
+Когда мы используем команду выполнения тестов CTest (`ctest -C Debug`) диагностический вывод будет ограниченным. По сути, эта команда позволяет проверить, являются ли тесты успешно пройденными. Вместе с тем, мы можем немного доработать приложение, сделав вывод гораздо более информативным. Предположим, что у нас есть тестируемый класс TestClass, с определением в файле "test.h":
+
+``` cpp
+class TestClass {
+public:
+	TestClass();
+	int ReturnZero();
+	int ReturnOne();
+};
+```
+
+Для простоты, поместим реализацию класса и тесты в один файл - "test.cpp":
+
+``` cpp
+#include "gtest/gtest.h"
+#include "test.h"
+
+TestClass::TestClass() {
+}
+
+int TestClass::ReturnZero()
+{
+	return 1;	// Имитация ошибки
+}
+
+int TestClass::ReturnOne()
+{
+	return 1;	// Имитация успешного выполнения
+}
+
+namespace {
+	TEST(TestClass, ReturnZero) {
+		TestClass tc;
+		EXPECT_EQ(0, tc.ReturnZero());
+	}
+
+	TEST(TestClass, ReturnOne) {
+		TestClass tc;
+		EXPECT_EQ(1, tc.ReturnOne());
+	}
+}
+
+int main(int argc, char** argv) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
+```
+
+Метод ReturnZero() будет возвращать ошибочное значение - это нужно, чтобы тест провалился и мы это увидели.
+
+В приведённом выше примере новым являются код функции main() и применение макросов Google Test. В функции main() добавлен вызов InitGoogleTest(), который позволяет обрабатывать дополнительные параметры, определяющие стратегию проведения тестов. А макрос RUN_ALL_TESTS() позволяет выполнить все тесты определённые в приложении:
+
+``` cpp
+int main(int argc, char** argv) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
+```
+
+Для описания теста используется макроc TEST() и макрос условия выполнения - EXPECT_EQ():
+
+``` cpp
+TEST(TestClass, ReturnOne) {
+	TestClass tc;
+	EXPECT_EQ(1, tc.ReturnOne());
+}
+```
+
+Параметрами вызова TEST() являются имя тестируемого класса (TestClass) и тестируемый метод (ReturnOne).
+
+Условие EXPECT_EQ() указывает на ожидаемый результат - если фактический и ожидаемый результаты совпадут, тест будет выполнен успешно, а если не совпадут - будет зафиксирована ошибка выполнения теста.
+
 # Sanitizers
 
 В современных компиляторах (clang и gcc) существует прекрасная функциональная особенность, позволяющая подключать дополнительные инструментальные средства, в частности – санитайзеры, инструменты автоматического поиска ошибок в коде в процессе исполнения. Ссылка на библиотеку: https://github.com/google/sanitizers
