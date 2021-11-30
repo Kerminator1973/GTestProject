@@ -196,6 +196,31 @@ TEST(TestClass, ReturnOne) {
 
 Условие EXPECT_EQ() указывает на ожидаемый результат - если фактический и ожидаемый результаты совпадут, тест будет выполнен успешно, а если не совпадут - будет зафиксирована ошибка выполнения теста.
 
+Если мы запустим исполняемый файл выполняющий тесты, то получим подробный лог выполнения тестов, с подробным логом выполнения тестов:
+
+```
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from TestClass
+[ RUN      ] TestClass.ReturnZero
+K:\Sources\Playground\uniqueRnd\test.cpp(22): error: Expected equality of these values:
+  0
+  tc.ReturnZero()
+    Which is: 1
+[  FAILED  ] TestClass.ReturnZero (2 ms)
+[ RUN      ] TestClass.ReturnOne
+[       OK ] TestClass.ReturnOne (0 ms)
+[----------] 2 tests from TestClass (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (5 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] TestClass.ReturnZero
+
+ 1 FAILED TEST
+ ```
+
 # Sanitizers
 
 В современных компиляторах (clang и gcc) существует прекрасная функциональная особенность, позволяющая подключать дополнительные инструментальные средства, в частности – санитайзеры, инструменты автоматического поиска ошибок в коде в процессе исполнения. Ссылка на библиотеку: https://github.com/google/sanitizers
