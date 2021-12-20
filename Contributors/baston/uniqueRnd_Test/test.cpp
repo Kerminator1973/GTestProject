@@ -1,30 +1,56 @@
 #include "gtest/gtest.h"
 #include "uniqueRnd.h"
+#include <boost/filesystem.hpp>
 #include "test.h"
 
 TestClass::TestClass() {
 }
 
-int TestClass::ReturnZero()
-{
-	return 1;	// РРјРёС‚Р°С†РёСЏ РѕС€РёР±РєРё
+int TestClass::TestInit() {
+	const bool bInit = (argc == 2) && (std::string("init") == argv[1]);				// Режим инициализации
+	if (bInit) boost::filesystem::remove(filename);									// Удаление файла с псевдослучайными числами
+	path p;
+	auto filename = ((p = argv[0]).remove_filename() / "emv.random.history");
+	return bInit;
 }
 
-int TestClass::ReturnOne()
-{
-	return 1;	// РРјРёС‚Р°С†РёСЏ СѓСЃРїРµС€РЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ
+bool TestClass::CheckFirstElem() {
+	UniqueRandomNumbersChecker checker(filename.string());							// Инициализируем объект генерации случайных чисел
+	
+	uint32_t valueToRegister = 8500;
+
+	if (bInit) {																	// Добавление элементов
+		for (int i = 1; i < 13600; i++) {											 
+			if (!checker.RegisterIfUnique(i)) return false;
+		}
+		valueToRegister++;
+	}
+	if (!checker.RegisterIfUnique(valueToRegister)) return false;					// Проверяем, что самых первых чисел в массиве нет
+	return true;
 }
+
+bool TestClass::CheckElem5000() {													// Проверяем, что в списке есть числа, которые были установлены во время последних 5000 вызовов
+	if (checker.RegisterIfUnique(12404)) return false;
+	return true;
+}
+
+
 
 namespace {
 
-	TEST(TestClass, ReturnZero) {
+	TEST(TestClass, TestInit) {
 		TestClass tc;
-		EXPECT_EQ(0, tc.ReturnZero());
+		EXPECT_NE(0, tc.TestInit());
 	}
 
-	TEST(TestClass, ReturnOne) {
+	TEST(TestClass, CheckFirstElem) {
 		TestClass tc;
-		EXPECT_EQ(1, tc.ReturnOne());
+		EXPECT_EQ(true, tc.CheckFirstElem());
+	}
+
+	TEST(TestClass, CheckElem5000) {
+		TestClass tc;
+		EXPECT_EQ(true, tc.CheckElem5000());
 	}
 }
 

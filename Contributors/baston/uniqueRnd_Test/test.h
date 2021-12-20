@@ -1,7 +1,8 @@
-// A simple monotonic counter.
+
 class TestClass {
 public:
 	TestClass();
-	int ReturnZero();
-	int ReturnOne();
+	int TestInit();
+	bool CheckFirstElem();
+	bool CheckElem5000();
 };
