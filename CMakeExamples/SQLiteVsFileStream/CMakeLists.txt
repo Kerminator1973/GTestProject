@@ -19,7 +19,7 @@ message("benchmark_INCLUDE_DIRS: ${benchmark_INCLUDE_DIRS}")
 # Имя исполняемого файла будет соответствовать имени проекта
 add_executable(${PROJECT_NAME} "")
 
-# Указываем подкаталог с Boost-ом, в котором нужно искать его include-файлы
+# Указываем подкаталог Google Benchmark, в котором нужно искать его include-файлы
 target_include_directories( ${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIRS})
 
 # Указываем список файлов, которые должны использоваться для сборки приложения
