@@ -33,7 +33,19 @@ BENCHMARK_MAIN();
 g++ ./benchtest.cpp -std=c++11 -isystem benchmark/include -L~/benchmark/build/src -lbenchmark -lpthread -o benchtest
 ```
 
-Для использования совместно с CMake, должен быть установлен инструмент [Google Test](https://github.com/google/googletest). Типовой скрипт CMake для сборки проекта (под Linux) с использование Google Benchmark, файл "CMakeLists.txt":
+Для использования совместно с CMake, должен быть установлен инструмент [Google Test](https://github.com/google/googletest). 
+
+Google Test и Google Benchmark загружаются в исходных текстах и их необходимо собрать. Типовая строка сборки в Release-варианте выглядит следующим образом:
+
+``` shell
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+cmake --install .
+```
+
+Типовой скрипт CMake для сборки проекта (под Linux) с использованием Google Benchmark, файл "CMakeLists.txt":
 
 ``` cmake
 cmake_minimum_required(VERSION 3.10)
