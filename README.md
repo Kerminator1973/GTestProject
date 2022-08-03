@@ -16,7 +16,7 @@
 
 В качестве инструмента организации Unit-тестов рекомендуется использовать библиотеку [Google Test](https://github.com/google/googletest).
 
-Для сравнения эффективности разных вариантов реализации алгоритмов на C++ рекомендуется использовать [Google Benchmark](https://github.com/google/benchmark).
+Для сравнения эффективности разных вариантов реализации алгоритмов на C++ рекомендуется использовать [Google Benchmark](https://github.com/google/benchmark). В случае, если создание полноценной среды разработки нежелательно, можно использовать специализированный сайт [quick-bench.com/](https://quick-bench.com/), предоставляющий готовую к использованию среду online.
 
 Рекомендуется к ознакомлению [рецепт из книги](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-04) Rodovan Bast и Roberto Di Remigio, связанный с разработкой Unit-тестов. Так же кажется разумным озакомиться с книгой **Hands-On: Design Patterns with C++** by Fedor G. Pikus.
 
