@@ -9,7 +9,7 @@ if (WIN32)
 	# не стандартным образом, в не стандартных местах расположения на жёсстком диске и
 	# функция find_package найти его не сможет. По этой причине, CMake нуждается в подсказке
 	set( BOOST_ROOT c:/boost/ )
-	set( BOOST_INCLUDEDIR c:/boost/include/boost-1_76/ )
+	set( BOOST_INCLUDEDIR c:/boost/include/boost-1_82/ )
 	set( BOOST_LIBRARYDIR c:/boost/lib )    
 endif (WIN32)
 
