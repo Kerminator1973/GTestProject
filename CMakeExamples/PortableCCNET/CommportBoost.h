@@ -5,7 +5,7 @@
 class CCommPortBoost
 {
 public:
-    // TODO: выполнить рефакторинг кода
+    // TODO: выполнить рефакторинг комментариев
     enum eResult
     {
         OK,           //Удачно
@@ -16,7 +16,6 @@ public:
         ERR,          //Общая ошибка
     };
 
-public:
     CCommPortBoost(const std::string &strPortName, const int msTimeout = 2000);
     ~CCommPortBoost();
 
@@ -26,6 +25,9 @@ public:
     std::vector<uint8_t> GetResult();
 
 private:
+    // Обработчики результатов выполненной асинхронной команды
+    void _writeHandler(const boost::system::error_code& err, std::size_t writeBytes);
+    void _readHandler(const boost::system::error_code& err, std::size_t readBytes);
 
     // Сервис, управляющий выполнением асинхронных зададач
     boost::asio::io_service m_ioService;
@@ -43,10 +45,5 @@ private:
     std::vector<uint8_t> m_inputData;
 
     // Количесто фактически полученных данных от прибора
-    std::size_t m_nReceived;
-
-private:
-    // Обработчики результатов выполненной асинхронной команды
-    void _writeHandler(const boost::system::error_code &err, std::size_t writeBytes);
-    void _readHandler(const boost::system::error_code &err, std::size_t readBytes);
+    std::size_t m_nReceived = 0;
 };
