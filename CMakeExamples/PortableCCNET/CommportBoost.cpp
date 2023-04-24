@@ -29,8 +29,12 @@ CCommPortBoost::~CCommPortBoost()
 std::vector<unsigned char> CCommPortBoost::GetResult()
 {
     std::vector<uint8_t> result;
-    copy(m_inputData.begin(), m_inputData.begin() + m_nReceived, 
-        back_inserter(result));
+
+    if (m_Result == CCommPortBoost::OK) {
+        copy(m_inputData.begin(), m_inputData.begin() + m_nReceived,
+            back_inserter(result));
+    }
+
     return result;
 }
 
@@ -40,6 +44,9 @@ CCommPortBoost::eResult CCommPortBoost::Execute(const std::vector<uint8_t> &comm
     if (!m_port.is_open())
     {
         try {
+            m_Result = CCommPortBoost::CONNECT_ERR;
+            m_errorMessage.clear();
+
             m_port.open(m_strPortName);
 
             // Настраиваем параметры подключения
@@ -49,7 +56,8 @@ CCommPortBoost::eResult CCommPortBoost::Execute(const std::vector<uint8_t> &comm
             m_port.set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
             m_port.set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
         }
-        catch(boost::system::system_error&) {
+        catch(boost::system::system_error& ex) {
+            m_errorMessage = ex.what();
             return CONNECT_ERR;
         }
     }
@@ -69,15 +77,8 @@ CCommPortBoost::eResult CCommPortBoost::Execute(const std::vector<uint8_t> &comm
     m_ioService.restart();
     std::chrono::milliseconds ms{ m_msTimeout };
     auto nHandlerCount = m_ioService.run_for(ms);
-    
-    // TODO: переделать! Сёма предположил, что можно ориентироваться на количество 
-    // callback-вызовов. В действительности нужно явным образом обрабатывать результат
-    // на каждом этапе выполнения всей операции
-    if (nHandlerCount < 2) {
-        return ERR;
-    }
 
-    return OK;
+    return m_Result;
 }
 
 void CCommPortBoost::_writeHandler(const boost::system::error_code &err, std::size_t writeBytes)
@@ -97,21 +98,21 @@ void CCommPortBoost::_writeHandler(const boost::system::error_code &err, std::si
     }
     else
     {
-        // Something went wrong
-        std::cout << err.message() << "\n";
+        m_Result = CCommPortBoost::WRITE_ERR;
+        m_errorMessage = err.message();
     }
 }
 
 void CCommPortBoost::_readHandler(const boost::system::error_code &err, std::size_t readBytes)
 {
-    // TODO: здесь нужно обработать код ошибки и проверить, а являются ли полученные данные полными
     if (!err)
     {
         m_nReceived = readBytes;
+        m_Result = CCommPortBoost::OK;
     }
     else
     {
-        // Something went wrong
-        std::cout << err.message() << "\n";
+        m_Result = CCommPortBoost::READ_ERR;
+        m_errorMessage = err.message();
     }
 }

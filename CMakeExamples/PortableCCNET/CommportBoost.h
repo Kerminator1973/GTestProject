@@ -5,15 +5,12 @@
 class CCommPortBoost
 {
 public:
-    // TODO: выполнить рефакторинг комментариев
     enum eResult
     {
-        OK,           //Удачно
-        CONNECT_ERR,  //Ошибка при подключении к порту
-        WRITE_ERR,    //Ошибка при записи данных
-        READ_ERR,     //Ошибка при чтении данных
-        TIMEOUT_ERR,  //Время вышло
-        ERR,          //Общая ошибка
+        OK,             // Успешное завершение операции
+        CONNECT_ERR,    // Не удалось подключиться к прибору
+        WRITE_ERR,      // Ошибка при записи данных в порт
+        READ_ERR        // Ошибка при чтении данных из порта
     };
 
     CCommPortBoost(const std::string &strPortName, const int msTimeout = 2000);
@@ -24,12 +21,17 @@ public:
     // TODO: возможно, следует использовать std::range
     std::vector<uint8_t> GetResult();
 
+    inline std::string GetErrorMessage()
+    {
+        return m_errorMessage;
+    }
+
 private:
     // Обработчики результатов выполненной асинхронной команды
     void _writeHandler(const boost::system::error_code& err, std::size_t writeBytes);
     void _readHandler(const boost::system::error_code& err, std::size_t readBytes);
 
-    // Сервис, управляющий выполнением асинхронных зададач
+    // Сервис, управляющий выполнением асинхронных задач
     boost::asio::io_service m_ioService;
 
     // Коммуникационный порт, через который осуществляется взаимодействие с прибором BVS
@@ -44,6 +46,12 @@ private:
     // Буфер чтения данных из прибора BVS
     std::vector<uint8_t> m_inputData;
 
-    // Количесто фактически полученных данных от прибора
+    // Количество фактически полученных данных от прибора
     std::size_t m_nReceived = 0;
+
+    // Результат выполнения операции
+    eResult m_Result = CONNECT_ERR;
+
+    // Текст сообщения об ошибке
+    std::string m_errorMessage;
 };
