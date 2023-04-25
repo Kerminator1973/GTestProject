@@ -2,34 +2,34 @@
 
 Рекомендуется создать в папке с проектом "CMakeExamples\BuildWithGoogleTest" подпапку с именем "build" и перейти в неё:
 
-```
+``` shell
 mkdir -p build
 cd build
 ```
 
-Запустить процесс поиска компиляторов и генерацию скрипта сборки для конкретной машины можно выполнить командой: 
+Запустить процесс поиска компиляторов и генерацию скрипта сборки для конкретной машины можно выполнить командой:
 
-```
+``` shell
 cmake ..
-``` 
+```
 
 Поскольку мы находимся внутри папки **build** две точки указывают, что сборку нужно начать в папке на уровень выше. Смысл в создании папки build и генерации скриптов сборки в неё состоит в простой процедуре удаляения всех временных файлов и папок - вполне достаточно удалить папку **build** со всем, что в ней находится.
 
-Сборка проекта найденными компиляторами осуществляется командой: 
+Сборка проекта найденными компиляторами осуществляется командой:
 
-```
+``` shell
 cmake --build .
 ```
 
-Запустить тесты на выполнение можно командой: 
+Запустить тесты на выполнение можно командой:
 
-```
+``` shell
 ctest -C Debug
 ```
 
 В данном случае, используется конфигурация **Debug**, но может быть использованы и другие конфигурации, например, **Release**.
 
-# Как работает CMakeLists.txt (из папки BuildWithGoogleTest)
+## Как работает CMakeLists.txt (из папки BuildWithGoogleTest)
 
 Файл "sum_integers.cpp" используется для сборки библиотеки sum_integers (sum_integers.dll):
 
@@ -39,14 +39,14 @@ add_library(sum_integers sum_integers.cpp)
 
 Исполняемый файл sum_up (sum_up.exe) собирается из файла "main.cpp":
 
-```
+``` cmake
 add_executable(sum_up main.cpp)
 target_link_libraries(sum_up sum_integers)
 ```
 
 Приложение sum_up, в нашем примере, как-будто передаётся клиентам. Оно умеет суммировать все числа, которые будут переданы через командную строку, например:
 
-```
+``` console
 sum_up 3 4 5
 ```
 
@@ -56,22 +56,21 @@ sum_up 3 4 5
 
 Далее в скрипте, мы определяем настройку, которая активирует, или отключает Unit-тестирование. По умолчанию, настройка включена:
 
-```
+``` cmake
 option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 ```
 
 Если Unit-тестирование включено, то подключается дополнительная команда **FetchContent*, которая позволяет выкачать исходные тексты Google Test с указанного репозитария, с указанием конкретного Tag-а. 
 
-```
+``` cmake
 if(ENABLE_UNIT_TESTS)
   include(FetchContent)
 ```
 
-
 Рекомендуется использовать актуальные выпуски библиотеки, ознакомившись с содержимым [репозитария на GitHub](https://github.com/google/googletest). Настройка параметров репозитария осуществляется так:
 
-```
+``` cmake
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
@@ -81,13 +80,13 @@ if(ENABLE_UNIT_TESTS)
 
 Получение дополнительных параметров из загруженной библиотеки выполняется командой:
 
-```
+``` cmake
   FetchContent_GetProperties(googletest)
 ```
 
 Непосредственная загрузка данных из репозитария осуществляется командой:
 
-```
+``` cmake
   if(NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
 ```
@@ -96,7 +95,7 @@ if(ENABLE_UNIT_TESTS)
 
 Важным является включение в проект подкаталогов из загруженного репозитария:
 
-```
+``` cmake
     add_subdirectory(
       ${googletest_SOURCE_DIR}
       ${googletest_BINARY_DIR}
@@ -105,7 +104,7 @@ if(ENABLE_UNIT_TESTS)
 
 Ещё один исполняемый файл будет называться **cpp_test** и именно он будет содержать Unit-тесты для библиотеки **sum_integers**:
 
-```
+``` cmake
   add_executable(cpp_test "")
 
   target_sources(cpp_test
@@ -122,7 +121,7 @@ if(ENABLE_UNIT_TESTS)
 
 Финальная часть скрипта - запуск на исполнения файла "cpp_test" с целью выполнения Unit-тестов и сборки статистики выполнения:
 
-```
+``` cmake
   enable_testing()
 
   add_test(
@@ -145,9 +144,9 @@ endif()
 ``` cpp
 class TestClass {
 public:
-	TestClass();
-	int ReturnZero();
-	int ReturnOne();
+  TestClass();
+  int ReturnZero();
+  int ReturnOne();
 };
 ```
 
@@ -162,12 +161,12 @@ TestClass::TestClass() {
 
 int TestClass::ReturnZero()
 {
-	return 1;	// Имитация ошибки
+  return 1;	// Имитация ошибки
 }
 
 int TestClass::ReturnOne()
 {
-	return 1;	// Имитация успешного выполнения
+  return 1;	// Имитация успешного выполнения
 }
 
 namespace {
@@ -194,8 +193,8 @@ int main(int argc, char** argv) {
 
 ``` cpp
 int main(int argc, char** argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
 ```
 
@@ -224,7 +223,7 @@ TEST(TestClass, ReturnOne) {
 
 Если мы запустим исполняемый файл выполняющий тесты, то получим подробный лог выполнения тестов, с подробным логом выполнения тестов:
 
-```
+``` output
 [==========] Running 2 tests from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 2 tests from TestClass
@@ -247,7 +246,7 @@ K:\Sources\Playground\uniqueRnd\test.cpp(22): error: Expected equality of these 
  1 FAILED TEST
  ```
 
-# Sanitizers
+## Sanitizers
 
 В современных компиляторах (clang и gcc) существует прекрасная функциональная особенность, позволяющая подключать дополнительные инструментальные средства, в частности – санитайзеры, инструменты автоматического поиска ошибок в коде в процессе исполнения. Ссылка на библиотеку: https://github.com/google/sanitizers
 
@@ -259,7 +258,7 @@ K:\Sources\Playground\uniqueRnd\test.cpp(22): error: Expected equality of these 
 * Uninitialized reads (memory sanitizer)
 * Thread safety (thread sanitizer)
 * Undefined behavior (undefined behavior sanitizer)
- 
+
 По сравнению с другими подходами (внешние инструменты, такие как [Valgrid](https://valgrind.org/)), санитайзеры обычно гораздо экономнее используют вычислительные ресурсы и дают больше полезной информации о найденных проблемах. Единственный _drawback_ – ваши исходные тексты и библиотеки должны быть пересобраны с дополнительными флагами.
 
 Sanitizers уже давно доступны для Clang и GCC.
@@ -270,14 +269,14 @@ Sanitizers уже давно доступны для Clang и GCC.
 
 Выполнил сборку проекта командами:
 
-```
+``` shell
 cmake .
 cmake --build .
 ```
 
 Типовая условная сборка отдельного санитайзера:
 
-```
+``` cmake
 set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 set(CMAKE_REQUIRED_FLAGS ${ASAN_FLAGS})
 check_cxx_compiler_flag(${ASAN_FLAGS} asan_works)
@@ -297,11 +296,11 @@ if(asan_works)
 endif()
 ```
 
-Скрипт сборки создал makefiles только для трёх санитайзеров: asan-example, tsan-example и ubsan-example. Приложения запускаются и действительно выдают полезную информацию. 
+Скрипт сборки создал makefiles только для трёх санитайзеров: asan-example, tsan-example и ubsan-example. Приложения запускаются и действительно выдают полезную информацию.
 
 Пример приложения:
 
-```
+``` cpp
 int main(int argc, char **argv) {
 	int stack_array[100];
 	stack_array[1] = 0;
@@ -314,7 +313,7 @@ int main(int argc, char **argv) {
 
 Получаем:
 
-```
+``` output
 ==3888==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fffd9423594 at pc 0x555c5612eaff bp 0x7fffd94233d0 sp 0x7fffd94233c0
 …
     #0 0x555c5612e989 in main /home/developer/cmake-cookbook/chapter-05/recipe-07/cxx-example/asan-example.cpp:1
@@ -331,7 +330,7 @@ Shadow bytes around the buggy address: …
 
 На RPi 3 установлен gcc 8.3, но проекты tsan и msan не собрались. Исполняемый модуль asan-example собрался, но не заработал из-за отсутствия необходимой библиотеки. После того, как был добавлен ключ сборки -static-libasan приложение прекрасно отработало:
 
-```
+``` cmake
 set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer -static-libasan")
 ```
 
