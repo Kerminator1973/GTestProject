@@ -2,9 +2,10 @@
 #include <sstream>  // Потребитель: vectorToString()
 #include <iomanip>  // setfill(), setw()
 #include <string>
-#include <locale>
-#include <clocale>
-#include"CommportBoost.h"
+#include <locale>   // Локализация текстовой консоли
+#include <clocale>  // Локализация текстовой консоли
+#include <chrono>   // Замер времени выполнения обмена данными с прибором BVS
+#include "ccnet/CommportBoost.h"
 
 
 std::string vectorToString(const std::vector<uint8_t>& vec)
@@ -46,9 +47,15 @@ int main(int argc, char *argv[]) {
 	// Android!?
 #endif
 
+    auto begin = std::chrono::high_resolution_clock::now();
+
 	CCommPortBoost port(strPortName);
-    switch (port.Execute(std::vector<uint8_t>{0x02, 0x03, 0x06, 0x37, 0xfe, 0xc7}))
-    {
+    // Выполняем десять операций подряд, с целью определить производительность
+    // обмена данными между прибором BVS и персональным компьютером
+    for (int i = 0; i < 10; i++) {
+
+        switch (port.Execute(std::vector<uint8_t>{0x02, 0x03, 0x06, 0x37, 0xfe, 0xc7}))
+        {
         case CCommPortBoost::OK:
             std::cout << __FUNCTION__ << "() Successful" << std::endl;
             std::cout << vectorToString(port.GetResult()) << std::endl;
@@ -65,5 +72,10 @@ int main(int argc, char *argv[]) {
             std::cout << __FUNCTION__ << "() Read error" << std::endl;
             std::cout << port.GetErrorMessage() << std::endl;
             break;
+        }
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << "Time measured: " << elapsed.count() * 1e-9 << " seconds\n";
 }
