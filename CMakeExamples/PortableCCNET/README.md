@@ -18,3 +18,22 @@ cmake --build .
 ``` shell
 %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 ```
+
+## Выполнение Unit-тестирования
+
+Скрипт сборки Unit-тестов самостоятельно выкачивает актуальную версию Google Test и выполняем сборку тестируемого приложения.
+
+Для запуска Unit-тестов следует выполинить следующие команды:
+
+``` shell
+cd /build/unittest
+ctest -C Debug
+```
+
+После этого можно посмотреть результаты тестирования в папке `/build/unittest/Testing/Temporary`
+
+Если требуется отключить сборку Unit-тестов, то в "CMakeLists.txt" из папки "unittest" следует установить значение переменной **ENABLE_UNIT_TESTS** в значение **OFF**:
+
+``` cmake
+option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
+```

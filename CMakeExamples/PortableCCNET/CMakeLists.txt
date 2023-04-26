@@ -7,7 +7,9 @@ cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 # Имя проекта PortableDSlip, или dsliportable одной строкой
 project(dsliportable LANGUAGES CXX)
 
+# Подкаталоги, в которых следует искать дополнительные проекты
 add_subdirectory(ccnet)
+add_subdirectory(unittest)
 
 # В C++ 17 очень много вкусных возможностей: std::string_view, std::optional, std::variant
 set(CMAKE_CXX_STANDARD 17)

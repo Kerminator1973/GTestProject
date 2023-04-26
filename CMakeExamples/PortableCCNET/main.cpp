@@ -5,7 +5,7 @@
 #include <locale>   // Локализация текстовой консоли
 #include <clocale>  // Локализация текстовой консоли
 #include <chrono>   // Замер времени выполнения обмена данными с прибором BVS
-#include "ccnet/CommportBoost.h"
+#include "ccnet/transport.h"
 
 
 std::string vectorToString(const std::vector<uint8_t>& vec)
@@ -49,28 +49,34 @@ int main(int argc, char *argv[]) {
 
     auto begin = std::chrono::high_resolution_clock::now();
 
-	CCommPortBoost port(strPortName);
+	CCNetTransport port(strPortName);
     // Выполняем десять операций подряд, с целью определить производительность
     // обмена данными между прибором BVS и персональным компьютером
     for (int i = 0; i < 10; i++) {
 
-        switch (port.Execute(std::vector<uint8_t>{0x02, 0x03, 0x06, 0x37, 0xfe, 0xc7}))
+        // Последние два байта должны содержат CRC16 и Execute() сам посчитает эти CRC.
+        // Для информации, последние байты должны быть 0xfe, 0xc7.
+        // Отправляется команда Identification
+        switch (port.Execute(std::vector<uint8_t>{0x02, 0x03, 0x06, 0x37, 0x00, 0x00}))
         {
-        case CCommPortBoost::OK:
+        case CCNetTransport::OK:
             std::cout << __FUNCTION__ << "() Successful" << std::endl;
             std::cout << vectorToString(port.GetResult()) << std::endl;
             break;
-        case CCommPortBoost::CONNECT_ERR:
+        case CCNetTransport::CONNECT_ERR:
             std::cout << __FUNCTION__ << "() Connection error" << std::endl;
             std::cout << port.GetErrorMessage() << std::endl;
             break;
-        case CCommPortBoost::WRITE_ERR:
+        case CCNetTransport::WRITE_ERR:
             std::cout << __FUNCTION__ << "() Write error" << std::endl;
             std::cout << port.GetErrorMessage() << std::endl;
             break;
-        case CCommPortBoost::READ_ERR:
+        case CCNetTransport::READ_ERR:
             std::cout << __FUNCTION__ << "() Read error" << std::endl;
             std::cout << port.GetErrorMessage() << std::endl;
+            break;
+        case CCNetTransport::WRONG_CRC:
+            std::cout << __FUNCTION__ << "() Wrong CRC has received" << std::endl;
             break;
         }
     }

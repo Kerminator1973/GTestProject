@@ -31,8 +31,8 @@ find_package(Boost 1.74 REQUIRED COMPONENTS system)
 
 # Указываем файлы, которые входят в состав библиотеки
 add_library(${PROJECT_NAME}
-    CommportBoost.cpp
-    CommportBoost.h
+    transport.cpp
+    transport.h
     )
 
 # Указываем подкаталог Boost-а, в котором следует искать его include-файлы
