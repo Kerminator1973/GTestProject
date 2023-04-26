@@ -1,2 +1,6 @@
 CMakeExamples/PortableCCNET/build
-
+.vscode
+Contributors/baston/CMake_GoogleTest/build/
+CMakeLists.txt.bak
+settings.json
+c_cpp_properties.json
