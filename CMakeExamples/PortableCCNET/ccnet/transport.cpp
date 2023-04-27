@@ -9,8 +9,10 @@ CCNetTransport::CCNetTransport(const std::string &strPortName, const int msTimeo
     , m_strPortName(strPortName)
 {
     // Устанавливаем максимальный размер буфера чтения в 1024. Это ограничение
-    // взято из документа "Эксплуатационная документация. D210BA"
+    // взято из документа "Эксплуатационная документация. D210BA".
+    // TODO: однако, размер буфера USB-устройств - 4096
     m_inputData.resize(1024);
+    m_accBuffer.resize(1024);
 }
 
 CCNetTransport::~CCNetTransport()
@@ -51,11 +53,11 @@ bool CCNetTransport::Execute(std::vector<uint8_t> &command)
         }
     }
 
-    // Пересчиытваем CRC для отправляемой команды
+    // Пересчитываем CRC для отправляемой команды
     _updateCRC(command);
 
-    // Очищаем счётчик полученных данных
-    m_nReceived = 0;
+    // Сбрасываем накопительный буфер
+    m_accBuffer.clear();
 
     // Помещаем асинхронную команду в буфер для передачи в прибор BVS
     m_port.async_write_some(
@@ -71,20 +73,6 @@ bool CCNetTransport::Execute(std::vector<uint8_t> &command)
     m_ioService.run_for(ms);
 
     return m_Result == CCNetTransport::OK;
-}
-
-std::span<uint8_t> CCNetTransport::GetResult()
-{
-    //std::vector<uint8_t> result;
-
-    if (m_Result == CCNetTransport::OK) {
-        return std::span<uint8_t>(m_inputData.begin(), m_nReceived);
-        //copy(m_inputData.begin(), m_inputData.begin() + m_nReceived,
-        //    back_inserter(result));
-    }
-
-    // Возвращаем ссылку на пустой массив
-    return std::span<uint8_t>({});
 }
 
 void CCNetTransport::PrintError()
@@ -113,11 +101,7 @@ void CCNetTransport::_writeHandler(const boost::system::error_code &err, std::si
     if (!err && writeBytes > 0)
     {
         // Запускаем следующую асинхронную задачу - чтение данных из буфера
-        m_port.async_read_some(
-            boost::asio::buffer(m_inputData, m_inputData.size()),
-            boost::bind(&CCNetTransport::_readHandler, this,
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred));
+        _readAnotherPiece();
     }
     else
     {
@@ -130,12 +114,16 @@ void CCNetTransport::_readHandler(const boost::system::error_code &err, std::siz
 {
     if (!err)
     {
-        m_nReceived = readBytes;
+        m_accBuffer.insert(m_accBuffer.end(), m_inputData.begin(), m_inputData.begin() + readBytes);
+
         m_Result = CCNetTransport::OK;
 
         // Проверяем CRC полученного ответа на запрос
         if (!_checkCRC()) {
             m_Result = CCNetTransport::WRONG_CRC;
+
+            // Осуществляем попытку дочитать в буфер ещё некоторое количество байт данных
+            _readAnotherPiece();
         }
     }
     else
@@ -143,6 +131,15 @@ void CCNetTransport::_readHandler(const boost::system::error_code &err, std::siz
         m_Result = CCNetTransport::READ_ERR;
         m_errorMessage = err.message();
     }
+}
+
+void CCNetTransport::_readAnotherPiece()
+{
+    m_port.async_read_some(
+        boost::asio::buffer(m_inputData, m_inputData.size()),
+        boost::bind(&CCNetTransport::_readHandler, this,
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
 }
 
 uint16_t CCNetTransport::CalcCRC(const std::span<uint8_t> data)
@@ -165,19 +162,19 @@ void CCNetTransport::_updateCRC(std::vector<uint8_t>& data) const
 
 bool CCNetTransport::_checkCRC()
 {
-    if (m_nReceived > 2 && m_inputData.size() >= m_nReceived) {
+    const int count = m_accBuffer.size();
+    if (count > 2 && m_accBuffer.size() >= count) {
 
-        std::span<uint8_t> _span(m_inputData.begin(), m_nReceived);
+        std::span<uint8_t> _span(m_accBuffer.begin(), count);
 
         const auto crc16 = _calcCRC(_span);
         auto loBy = uint8_t(crc16 & 0x00FF);
         auto hiBy = uint8_t((crc16 & 0xFF00) >> 8);
 
-        if (m_inputData[m_nReceived - 2] == loBy && m_inputData[m_nReceived - 1] == hiBy) {
+        if (m_accBuffer[count - 2] == loBy && m_accBuffer[count - 1] == hiBy) {
             return true;
         }
     }
-
     return false;
 }
 

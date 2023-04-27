@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
         CCNetDeviceIdentification ident;
         if (device.Identification(ident))
         {
-            std::cout << "Successfully requested\n";
+            std::cout << "Request #" << i + 1 << " if successfully requested\n";
             //std::cout << vectorToString(device.GetResult()) << std::endl;
             std::cout << "  Part Number: " << ident.PartNumber << '\n';
             std::cout << "  Module Number: " << ident.ModuleNumber << '\n';
