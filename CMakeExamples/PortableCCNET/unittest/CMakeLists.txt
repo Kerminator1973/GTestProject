@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
 project(unittest LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -11,7 +11,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 # Загружаем актуальную версию исходных текстов Google Test.
 # Unit-тесты могут быть исключены из сборки, если у нас нет
 # доступа к сети (например, на сервере сборки)
-option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 
 if(ENABLE_UNIT_TESTS)

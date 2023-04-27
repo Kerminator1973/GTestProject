@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/asio.hpp>
 #include <vector>
+#include <span>
 
 class CCNetTransport
 {
@@ -21,19 +22,18 @@ public:
     // CRC16 (последние два байта), но вычисляется CRC16 внутри метода Execute().
     // Примечание: передача вектора вместе с полями CRC16 обусловлена минимизацией
     // операций выделения памяти на Heap-е
-    eResult Execute(std::vector<uint8_t> &command);
+    bool Execute(std::vector<uint8_t> &command);
 
-    // TODO: возможно, следует использовать std::range
-    std::vector<uint8_t> GetResult();
+    // Метод возвращает ссылку на часть буфера, в которой содержится ответ прибора.
+    // Поскольку возвращается ссылка, использовать её нужно до того, как будет удалён
+    // объект взаимодействия с прибором по COM-порту
+    std::span<uint8_t> GetResult();
 
-    // Метод возвращает сообщение об ошибке в коде
-    inline std::string GetErrorMessage()
-    {
-        return m_errorMessage;
-    }
+    // Метод выводит на экран информацию о выполнении запроса
+    void PrintError();
 
     // Метод вычисления CRC16 предназначен для выполнения Unit-тестирования
-    static const uint16_t CalcCRC(const std::vector<uint8_t>& data);
+    static uint16_t CalcCRC(const std::span<uint8_t> data);
 
 private:
     // Обработчики результатов выполненной асинхронной команды
@@ -42,7 +42,7 @@ private:
 
     // Метод разбивает data на два блока: команда и контрольная сумма (последние два 
     // байта). По байтам команды вычисляется CRC, которое затем копируется в поле CRC
-    void _updateCRC(std::vector<uint8_t>& data);
+    void _updateCRC(std::vector<uint8_t>& data) const;
 
     // Метод проверяет CRC полученного блока данных. Проверка CRC осуществляется
     // для данных, полученных из буфера ответа прибора
@@ -56,7 +56,8 @@ private:
     // В С++ 20 можно было бы использовать m_inputData и readBytes для создания "обёртки"
     // над контейнером, решающей данную задачу. См.: std::span, Ranges Library.
     // Также можно посмотреть: https://github.com/tcbrindle/span
-    static uint16_t _calcCRC(const std::vector<uint8_t>& data, size_t count);
+    //static uint16_t _calcCRC(const std::vector<uint8_t>& data, size_t count);
+    static uint16_t _calcCRC(const std::span<uint8_t>& data);
 
     // Сервис, управляющий выполнением асинхронных задач
     boost::asio::io_service m_ioService;

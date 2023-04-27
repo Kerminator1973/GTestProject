@@ -27,19 +27,7 @@ CCNetTransport::~CCNetTransport()
     }
 }
 
-std::vector<unsigned char> CCNetTransport::GetResult()
-{
-    std::vector<uint8_t> result;
-
-    if (m_Result == CCNetTransport::OK) {
-        copy(m_inputData.begin(), m_inputData.begin() + m_nReceived,
-            back_inserter(result));
-    }
-
-    return result;
-}
-
-CCNetTransport::eResult CCNetTransport::Execute(std::vector<uint8_t> &command)
+bool CCNetTransport::Execute(std::vector<uint8_t> &command)
 {
     // Если коммуникационный порт не открыт, то пытаемся его открыть
     if (!m_port.is_open())
@@ -59,7 +47,7 @@ CCNetTransport::eResult CCNetTransport::Execute(std::vector<uint8_t> &command)
         }
         catch(boost::system::system_error& ex) {
             m_errorMessage = ex.what();
-            return CONNECT_ERR;
+            return false;
         }
     }
 
@@ -80,9 +68,44 @@ CCNetTransport::eResult CCNetTransport::Execute(std::vector<uint8_t> &command)
     // можем запустить соответствующий контролирующий сервис (boost::asio::io_service)
     m_ioService.restart();
     std::chrono::milliseconds ms{ m_msTimeout };
-    auto nHandlerCount = m_ioService.run_for(ms);
+    m_ioService.run_for(ms);
 
-    return m_Result;
+    return m_Result == CCNetTransport::OK;
+}
+
+std::span<uint8_t> CCNetTransport::GetResult()
+{
+    //std::vector<uint8_t> result;
+
+    if (m_Result == CCNetTransport::OK) {
+        return std::span<uint8_t>(m_inputData.begin(), m_nReceived);
+        //copy(m_inputData.begin(), m_inputData.begin() + m_nReceived,
+        //    back_inserter(result));
+    }
+
+    // Возвращаем ссылку на пустой массив
+    return std::span<uint8_t>({});
+}
+
+void CCNetTransport::PrintError()
+{
+    switch (m_Result) {
+    case CCNetTransport::CONNECT_ERR:
+        std::cout << "Connection error" << std::endl;
+        std::cout << m_errorMessage << std::endl;
+        break;
+    case CCNetTransport::WRITE_ERR:
+        std::cout << "Write error" << std::endl;
+        std::cout << m_errorMessage << std::endl;
+        break;
+    case CCNetTransport::READ_ERR:
+        std::cout << "Read error" << std::endl;
+        std::cout << m_errorMessage << std::endl;
+        break;
+    case CCNetTransport::WRONG_CRC:
+        std::cout << "Wrong CRC has received" << std::endl;
+        break;
+    }
 }
 
 void CCNetTransport::_writeHandler(const boost::system::error_code &err, std::size_t writeBytes)
@@ -122,16 +145,19 @@ void CCNetTransport::_readHandler(const boost::system::error_code &err, std::siz
     }
 }
 
-const uint16_t CCNetTransport::CalcCRC(const std::vector<uint8_t>& data)
+uint16_t CCNetTransport::CalcCRC(const std::span<uint8_t> data)
 {
-    return _calcCRC(data, data.size());
+    return _calcCRC(data);
 }
 
-void CCNetTransport::_updateCRC(std::vector<uint8_t>& data)
+void CCNetTransport::_updateCRC(std::vector<uint8_t>& data) const
 {
     auto count = data.size();
     if (count > 2) {
-        const auto crc16 = _calcCRC(data, count);
+
+        std::span<uint8_t> _span(data.begin(), count);
+
+        const auto crc16 = _calcCRC(_span);
         data[count - 2] = crc16 & 0x00FF;
         data[count - 1] = (crc16 & 0xFF00) >> 8;
     }
@@ -139,8 +165,11 @@ void CCNetTransport::_updateCRC(std::vector<uint8_t>& data)
 
 bool CCNetTransport::_checkCRC()
 {
-    if (m_nReceived > 2) {
-        const auto crc16 = _calcCRC(m_inputData, m_nReceived);
+    if (m_nReceived > 2 && m_inputData.size() >= m_nReceived) {
+
+        std::span<uint8_t> _span(m_inputData.begin(), m_nReceived);
+
+        const auto crc16 = _calcCRC(_span);
         auto loBy = uint8_t(crc16 & 0x00FF);
         auto hiBy = uint8_t((crc16 & 0xFF00) >> 8);
 
@@ -155,8 +184,10 @@ bool CCNetTransport::_checkCRC()
 // Применяемый алгоритм вычисления контрольной суммы называется:
 // CRC16-CCITT (Kermit) 0x8408 Polynomial.
 // Пример кода на языке Си описан в "Эксплуатационная документация. D210BA"
-uint16_t CCNetTransport::_calcCRC(const std::vector<uint8_t>& data, size_t count)
+uint16_t CCNetTransport::_calcCRC(const std::span<uint8_t>& data)
 {
+    const size_t count = data.size();
+
     uint16_t acc = 0;
     for (int i = 0; i < count - 2; i++)
     {

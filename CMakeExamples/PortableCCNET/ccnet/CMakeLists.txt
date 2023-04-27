@@ -22,7 +22,7 @@ endif (WIN32)
 #	set( BOOST_LIBRARYDIR $ENV{HOME}/boost/current/lib_x86_64/ )
 #endif (Unix)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -33,6 +33,8 @@ find_package(Boost 1.74 REQUIRED COMPONENTS system)
 add_library(${PROJECT_NAME}
     transport.cpp
     transport.h
+    device.cpp
+    device.h
     )
 
 # Указываем подкаталог Boost-а, в котором следует искать его include-файлы

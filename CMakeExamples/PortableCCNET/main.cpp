@@ -5,10 +5,25 @@
 #include <locale>   // Локализация текстовой консоли
 #include <clocale>  // Локализация текстовой консоли
 #include <chrono>   // Замер времени выполнения обмена данными с прибором BVS
-#include "ccnet/transport.h"
+#include "ccnet/device.h"
+
+#ifdef __linux__
+using BYTE = unsigned char;
+using WORD = unsigned short;
+using DWORD = unsigned long;
+using DWORD_PTR = unsigned long;
+using PDWORD_PTR = DWORD_PTR*;
+
+#define MAKEWORD(a, b)      ((WORD)(((BYTE)(((DWORD_PTR)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD_PTR)(b)) & 0xff))) << 8))
+#define MAKELONG(a, b)      ((LONG)(((WORD)(((DWORD_PTR)(a)) & 0xffff)) | ((DWORD)((WORD)(((DWORD_PTR)(b)) & 0xffff))) << 16))
+#define LOWORD(l)           ((WORD)(((DWORD_PTR)(l)) & 0xffff))
+#define HIWORD(l)           ((WORD)((((DWORD_PTR)(l)) >> 16) & 0xffff))
+#define LOBYTE(w)           ((BYTE)(((DWORD_PTR)(w)) & 0xff))
+#define HIBYTE(w)           ((BYTE)((((DWORD_PTR)(w)) >> 8) & 0xff))
+#endif
 
 
-std::string vectorToString(const std::vector<uint8_t>& vec)
+std::string vectorToString(const std::span<uint8_t> vec)
 {
     std::stringstream result;
     for (const auto& v : vec)
@@ -20,10 +35,9 @@ std::string vectorToString(const std::vector<uint8_t>& vec)
     return result.str();
 }
 
-
 int main(int argc, char *argv[]) {
 	
-#ifdef __linux__ 
+#ifdef __linux__
    	const char* strPortName = "/dev/ttyDBA";
 
     std::setlocale(LC_ALL, "");
@@ -49,35 +63,28 @@ int main(int argc, char *argv[]) {
 
     auto begin = std::chrono::high_resolution_clock::now();
 
-	CCNetTransport port(strPortName);
+    CCNetDevice device(strPortName);
     // Выполняем десять операций подряд, с целью определить производительность
     // обмена данными между прибором BVS и персональным компьютером
     for (int i = 0; i < 10; i++) {
 
-        // Последние два байта должны содержат CRC16 и Execute() сам посчитает эти CRC.
-        // Для информации, последние байты должны быть 0xfe, 0xc7.
-        // Отправляется команда Identification
-        switch (port.Execute(std::vector<uint8_t>{0x02, 0x03, 0x06, 0x37, 0x00, 0x00}))
+        CCNetDeviceIdentification ident;
+        if (device.Identification(ident))
         {
-        case CCNetTransport::OK:
-            std::cout << __FUNCTION__ << "() Successful" << std::endl;
-            std::cout << vectorToString(port.GetResult()) << std::endl;
-            break;
-        case CCNetTransport::CONNECT_ERR:
-            std::cout << __FUNCTION__ << "() Connection error" << std::endl;
-            std::cout << port.GetErrorMessage() << std::endl;
-            break;
-        case CCNetTransport::WRITE_ERR:
-            std::cout << __FUNCTION__ << "() Write error" << std::endl;
-            std::cout << port.GetErrorMessage() << std::endl;
-            break;
-        case CCNetTransport::READ_ERR:
-            std::cout << __FUNCTION__ << "() Read error" << std::endl;
-            std::cout << port.GetErrorMessage() << std::endl;
-            break;
-        case CCNetTransport::WRONG_CRC:
-            std::cout << __FUNCTION__ << "() Wrong CRC has received" << std::endl;
-            break;
+            std::cout << "Successfully requested\n";
+            //std::cout << vectorToString(device.GetResult()) << std::endl;
+            std::cout << "  Part Number: " << ident.PartNumber << '\n';
+            std::cout << "  Module Number: " << ident.ModuleNumber << '\n';
+            std::cout << "  Software Version: " << (int)HIBYTE(HIWORD(ident.SoftwareVersion)) 
+                << "." << (int)LOBYTE(HIWORD(ident.SoftwareVersion))
+                << "." << (int)LOWORD(ident.SoftwareVersion) << '\n';
+            std::cout << "  Notebase Version: " << (int)HIWORD(ident.NotebaseVersion)
+                << "." << (int)HIBYTE(LOWORD(ident.NotebaseVersion))
+                << "." << std::setw(3) << std::setfill('0') << (int)LOBYTE(LOWORD(ident.NotebaseVersion)) << '\n';
+        }
+        else
+        {
+            device.PrintError();
         }
     }
 

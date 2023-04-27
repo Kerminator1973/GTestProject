@@ -11,8 +11,8 @@ project(dsliportable LANGUAGES CXX)
 add_subdirectory(ccnet)
 add_subdirectory(unittest)
 
-# В C++ 17 очень много вкусных возможностей: std::string_view, std::optional, std::variant
-set(CMAKE_CXX_STANDARD 17)
+# Требование стандарта C++20 связано с использованием std::span<>
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
