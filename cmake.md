@@ -63,14 +63,20 @@ endif (WIN32)
 find_package(Boost 1.74 REQUIRED COMPONENTS system)
 ```
 
+После ключевого слова COMPONENTS перечисляются необходимые в проекте библиотеки, например:
+
+``` cmake
+find_package(Boost 1.74 REQUIRED COMPONENTS system locale filesystem thread)
+```
+
+Если библиотеки будут найдены, то CMake создаст переменную `Boost_LIBRARIES`, которую можно будет использовать, например, в команде **target_link_libraries**, которая включает в генерируемый проект ссылки на линкуемые библиотеки:
+
+``` cmake
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+```
+
 Также следует включить в "CMakeLists.txt" инструкцию, включающую ссылку на папку с заголовочными файлами Boost в проект сборки:
 
 ``` cmake
 target_include_directories( ${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
-```
-
-В проект нужно включить и ссылки на линкуемые библиотеки:
-
-``` cmake
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 ```
