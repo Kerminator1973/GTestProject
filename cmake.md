@@ -82,3 +82,9 @@ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 ``` cmake
 target_include_directories( ${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 ```
+
+## Использование plug-ins CMake для Visual Studio Code
+
+Наиболее популярные plug-ins разработаны Microsoft (**CMake Tools**), **twxs** и **Jose Torres** и содержат инструменты IntelliSense для написания скриптов сборки CMakeLists.txt.
+
+Одна из наиболее полезных функций - выбор Kit-а для сборки исходников. Сделать это можно средствами CMake Tools, через "Command Palette..." и команду "CMake: Select a Kit".
