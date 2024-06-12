@@ -48,3 +48,24 @@ cmake  -DWITH_POSTGRESQL=ON -DPOSTGRESQL_INCLUDE_DIR="c:/Program Files/PostgreSQ
 -- POSTGRESQL_LIBRARIES                     = C:/Program Files/PostgreSQL/16/lib/libpq.lib
 -- POSTGRESQL_VERSION                       = 16.3
 ```
+
+В процессе генерации скрипта сборки будет создан файл, который следует включить в проект приложения, работающего с Postgres: `.\Debug\include\soci\soci-config.h`. Этот файл содержит директивы препроцессора, которые указывают на доступные адаптеры библиотеки. 
+
+Для контроля: в файле `soci-config.h` должна быть строка:
+
+```cpp
+// POSTGRESQL backend
+#define SOCI_HAVE_POSTGRESQL
+```
+
+Непосредственная сборка приложения может быть выполнена командой:
+
+```shell
+cmake --build . --config Debug
+```
+
+Результирующие артефакты сборки:
+
+- Динамические библиотеки: `\soci\Debug\bin\Debug`
+- Статические библиотеки: `\soci\Debug\lib\Debug`
+- Заголовочные файлы: `\soci\Debug\include` и `\soci\include`
