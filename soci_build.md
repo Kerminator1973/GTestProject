@@ -72,7 +72,57 @@ cmake --build . --config Debug
 - Статические библиотеки: `\soci\Debug\lib\Debug`
 - Заголовочные файлы: `\soci\Debug\include` и `\soci\include`
 
+### Проверочные действия
+
+В папке `\soci\Debug\bin\Debug` должны находится исполняемые файлы (dll и exe).
+
+Для проверки работоспособности собранных библиотек следует выполнить тестовый файл: `soci_postgresql_test.exe`
+
+В случае, если не хватает некоторых динамических библиотек, на экран будет выведено системное сообщение.
+
+По факту, необходимо скопировать в папку шесть файлов из состава PostgreSQL, либо следует указать папке с lib-файлами PostgreSQL в качестве папки для поиска dll-файлов по умолчанию.
+
+### Состав сборки
+
+По умолчанию, скрипт сборки собирает и динамические и статические библиотеки.
+
+Библиотеки со статической линковкой: libsoci_core_4_1.lib, libsoci_empty_4_1.lib, libsoci_odbc_4_1.lib, libsoci_postgresql_4_1.lib.
+
+Библиотеки с динамической линковкой (lib): soci_core_4_1.lib, soci_empty_4_1.lib, soci_odbc_4_1.lib, soci_postgresql_4_1.lib
+
+Реализация динамических библиотек (dll) находятся в папке "bin/Debug": soci_core_4_1.dll, soci_empty_4_1.dll, soci_odbc_4_1.dll, soci_postgresql_4_1.dll
+
 ## Сборка примера кода
 
 Базовый пример приложения размещён [здесь](https://soci.sourceforge.net/doc/release/3.1/)
 
+Мой вариант приложения:
+
+```cpp
+#include <iostream>
+#include <istream>
+#include <ostream>
+#include <string>
+#include <exception>
+#include "soci/soci.h"
+
+using namespace soci;
+using namespace std;
+
+int main()
+{
+    try
+    {
+        session sql("postgresql", "dbname=phonebook user=postgres password=38Gjgeuftd");
+
+        int count;
+        sql << "select count(*) from phonebook", into(count);
+
+        cout << "We have " << count << " entries in the phonebook.\n";
+    }
+    catch (exception const& e)
+    {
+        cerr << "Error: " << e.what() << '\n';
+    }
+}
+```
