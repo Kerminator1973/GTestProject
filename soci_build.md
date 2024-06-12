@@ -33,6 +33,8 @@ cmake  -DWITH_POSTGRESQL=ON -DPOSTGRESQL_INCLUDE_DIR="c:/Program Files/PostgreSQ
 
 Указать тип сборки можно специализированной командой: `-DCMAKE_BUILD_TYPE=RELEASE`
 
+Если не планируется использование библиотеки Boost, то следует добавить ключ генерации скриптов: `-DWITH_BOOST=OFF`
+
 Если в логах есть следующее сообщение, это означает, что сборка для Postgres была неуспешной:
 
 ```output
@@ -69,3 +71,8 @@ cmake --build . --config Debug
 - Динамические библиотеки: `\soci\Debug\bin\Debug`
 - Статические библиотеки: `\soci\Debug\lib\Debug`
 - Заголовочные файлы: `\soci\Debug\include` и `\soci\include`
+
+## Сборка примера кода
+
+Базовый пример приложения размещён [здесь](https://soci.sourceforge.net/doc/release/3.1/)
+
