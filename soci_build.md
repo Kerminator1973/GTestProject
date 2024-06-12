@@ -82,6 +82,21 @@ cmake --build . --config Debug
 
 По факту, необходимо скопировать в папку шесть файлов из состава PostgreSQL, либо следует указать папке с lib-файлами PostgreSQL в качестве папки для поиска dll-файлов по умолчанию.
 
+Если какие-то файлы будут отсутствовать, то в консоль будет выведено сообщение:
+
+```output
+Error: Failed to find shared library for backend postgresql
+```
+
+Проверить путь размещения файлов, можно есть начать отладку кода библиотеки. Нужно зайти в конструктор объекта session, затем в `lastConnectParameters_(backendName, connectString)`, далее в `factory_(&dynamic_backends::get(backendName))`, потом в `do_register_backend(name, std::string());`. Нас интересует код:
+
+```cpp
+std::string const fullFileName(search_paths_[i] + "/" + LIBNAME(name));
+h = DLOPEN(fullFileName.c_str());
+```
+
+В переменной fullFileName будет сохранено имя динамической библиотеки, которую планируется загрузить и использовать в качестве провайдера для доступа к данным в СУБД.
+
 ### Состав сборки
 
 По умолчанию, скрипт сборки собирает и динамические и статические библиотеки.
@@ -113,7 +128,7 @@ int main()
 {
     try
     {
-        session sql("postgresql", "dbname=phonebook user=postgres password=38Gjgeuftd");
+        session sql("postgresql", "dbname=postgres user=postgres password=38Gjgeuftd");
 
         int count;
         sql << "select count(*) from phonebook", into(count);
@@ -126,3 +141,15 @@ int main()
     }
 }
 ```
+
+В базе данных "postgres" была создана таблица "phonebook", в которую были добавлены две записи. Как результат, приложение вывело сообщение:
+
+```output
+We have 2 entries in the phonebook.
+```
+
+## TODO - что ещё имеет смысл сделать
+
+- Создать консольное приложение с использованием CMake
+- Описать процедуру сборки в Linux
+- Расписать оптимизацию сборки (что можно отключить)
