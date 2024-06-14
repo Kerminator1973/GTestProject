@@ -148,6 +148,8 @@ int main()
 We have 2 entries in the phonebook.
 ```
 
+Пример строки подключения к базе данных, на удалённом компьютере: `host=192.168.100.71 port=5432 user=postgres password=your_password dbname=ProIDC3`
+
 ## TODO - что ещё имеет смысл сделать
 
 - Создать консольное приложение с использованием CMake
