@@ -45,11 +45,23 @@ terminate called after throwing an instance of 'std::runtime_error'
   what():  locale::facet::_S_create_c_locale name not valid
 ```
 
+При работе с locale часто используется термин **facet**. Facets - это часто класса std::locale. Facets часто используются для определения специфальных аспектов локализации, таких как форматирование номеров, даты и времени, валюты, а также то, как следует обрабаывать преобразования текста.
+
+Примеры **facets**:
+
+- std::time_get: разбор даты и времени
+- std::time_put: форматирование даты и времени
+- std::num_get: разбор числовых значений
+- std::num_put: форматирование числовых значенией
+- std::money_get и std::money_put: работа с валютами
+
+Важные свойства facets: можно наследовать одни facets от других, чтобы сделать поведение кода более специфическим. Использование facets является **thread safe**.
+
 Для установки локализации на Linux системах, часто используются специализированные утилиты. Например, на RPi можно воспользоваться утилитой **raspi-config**. Кириллическая локализация называется "ru_RU.UTF-8".
 
 Установить локализацию можно и через командную строку, например:
 
-```
+```shell
 localedef -c -i ru_RU -f CP1251 ru_RU.CP1251
 ```
 
@@ -57,7 +69,7 @@ localedef -c -i ru_RU -f CP1251 ru_RU.CP1251
 
 Собрать его же компилятором из состава Visual Studio Toolset (под Windows) можно командой:
 
-```
+```shell
 cl /EHsc imbue.cpp
 ```
 
@@ -65,13 +77,13 @@ cl /EHsc imbue.cpp
 
 Выбрать подходящую строку инициализации можно нажав кнопку "Старт" -> "Visual Studio 2013" -> "Visual Studio Tools" и выбрав соответствующий скрипт. Для x86 (32-бита) используется следующая строка инициализации:
 
-```
+```shell
 %comspec% /k ""C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"" x86
 ```
 
 Настройка переменных окружения для Visual Studio 2019 для native-компилятора x64 осуществляется командой:
 
-```
+```shell
 %comspec% /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 ```
 

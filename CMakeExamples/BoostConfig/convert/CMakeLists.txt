@@ -16,5 +16,5 @@ find_package(Boost 1.74 REQUIRED COMPONENTS filesystem)
 # Указываем подкаталог Boost-а, в котором следует искать его include-файлы
 target_include_directories( ${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 
-# Указываем нужные нам библиотеки Boost. В общем случае, указываем все библиотеки
+# Указываем нужные нам библиотеки Boost
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
