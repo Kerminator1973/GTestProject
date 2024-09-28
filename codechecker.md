@@ -50,6 +50,14 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 
 Я устанавливал утилиту через snap и в моём случае она называлась `codechecker`.
 
+В общем случае, моежт потребоваться установить checkers:
+
+```shell
+sudo apt install clang-tidy
+sudo apt install clang
+sudo apt install clang-tools
+```
+
 Команда запуска статических анализаторов:
 
 ```shell
