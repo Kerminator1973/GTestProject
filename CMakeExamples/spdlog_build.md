@@ -70,3 +70,11 @@ FetchContent_MakeAvailable(spdlog)
 add_executable(YourExecutableName main.cpp)
 target_link_libraries(YourExecutableName PRIVATE spdlog::spdlog)
 ```
+
+В дочерних подпроектах, можно уже не загружать репозитарий, а использовать определённую на верхнем уровне библиотеку. Пример:
+
+```cmake
+add_executable(YourChildExecutableName main.cpp)
+
+target_link_libraries(YourChildExecutableName PRIVATE spdlog::spdlog)
+```
