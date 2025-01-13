@@ -78,3 +78,70 @@ add_executable(YourChildExecutableName main.cpp)
 
 target_link_libraries(YourChildExecutableName PRIVATE spdlog::spdlog)
 ```
+
+## Пример кода
+
+Заголовочные файлы:
+
+```cpp
+// Включаемый файлы библиотеки логирования spdlog
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+```
+
+Пример записи сообщения в Log:
+
+```cpp
+// Пример использования компонента логирования splog
+try
+{
+    auto logger = spdlog::basic_logger_mt("basic_logger", "logs/basic-log.txt");
+    logger->set_level(spdlog::level::debug);
+    logger->info("Used COM-port: {0}", strPortName.c_str());
+}
+catch (const spdlog::spdlog_ex& ex)
+{
+    std::cout << "Log init failed: " << ex.what() << std::endl;
+}
+```
+
+## Сборка под Windows
+
+Для сборки приложения под Windows может потребоваться добавить библиотеку Threads:
+
+```cmake
+# Подключаем библиотеку Threads
+find_package(Threads REQUIRED)
+```
+
+```cmake
+# Подключаем библиотеки, из подкаталогов "ccnet" и "dslip". Также подключаем библиотеки Boost и spdlog
+target_link_libraries(${PROJECT_NAME} ccnet dslip dxml BvsPackages Threads::Threads spdlog::spdlog ${Boost_LIBRARIES})
+```
+
+Скрипт подключения библиотеки ищет доступную библиотеку для обеспечения многопоточности. В приведённом ниже примере найдена библиотека Threads:
+
+```output
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+```
+
+Однако как только мы добавим заголовочный файл:
+
+```cpp
+#include "spdlog/spdlog.h"
+```
+
+при сборке приложения будет найдено множество сообщений, связанных с выбранной кодировкой страницы:
+
+```output
+E:\Sources\DSlipPortable\dxml\dxmlDevice.h(1,1): warning C4828: The file contains a character starting at offset 0x467
+that is illegal in the current source character set (codepage 65001). [E:\Sources\DSlipPortable\build\dsliportable.vcxp
+roj]
+  (compiling source file '../main.cpp')
+```
