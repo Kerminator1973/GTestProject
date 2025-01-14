@@ -137,11 +137,10 @@ target_link_libraries(${PROJECT_NAME} ccnet dslip dxml BvsPackages Threads::Thre
 #include "spdlog/spdlog.h"
 ```
 
-при сборке приложения будет найдено множество сообщений, связанных с выбранной кодировкой страницы:
+При сборке приложения может быть найдено множество сообщений, связанных с выбранной кодировкой страницы:
 
 ```output
-E:\Sources\DSlipPortable\dxml\dxmlDevice.h(1,1): warning C4828: The file contains a character starting at offset 0x467
-that is illegal in the current source character set (codepage 65001). [E:\Sources\DSlipPortable\build\dsliportable.vcxp
-roj]
-  (compiling source file '../main.cpp')
+E:\Sources\DSlipPortable\dxml\dxmlDevice.h(1,1): warning C4828: The file contains a character starting at offset 0x467 that is illegal in the current source character set (codepage 65001). [E:\Sources\DSlipPortable\build\dsliportable.vcxproj] (compiling source file '../main.сpp')
 ```
+
+Это сообщение говорит о том, что компилятор исходит из того, что текущей кодовой страницей является 65001 (UTF-8), но в некоторые заголовочные файлы, используемые в "main.cpp" имеют другую кодировку (CP-1251) и кириллические символы (в частности - текст комментариев) не соответствуют UTF-8. Чтобы решить проблему, достаточно найти такие заголовочные файлы и выполнить их конвертацию из CP-1251 в UTF-8.
