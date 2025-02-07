@@ -18,17 +18,30 @@ sudo apt update && sudo apt install build-essential
 git clone https://github.com/microsoft/vcpkg.git
 ```
 
-Далее необходимо запустить bootstrap для системы на которой планируется использовать репозитарий (sh/bat). Для Linux это следующая команда: `./bootstrap-vcpkg.sh`
-
-В Microsoft Windows скрипт компиляции называется `e:\SourcesFromGit\vcpkg\bootstrap-vcpkg.bat`
-
-Если каких-то зависимостей не будет, скрипт выведет на экране вспомогательные команды, которые помогут установить необходимые компоненты.
+> При загрузке репозитария могут возникнуть проблемы, в частности, может не хватать буфера для загружаемых данных. Решить эту проблему можно командой:
+>
+>```shell
+>git config --global http.postBuffer 524288000
+>```
+>
+> Для работы через корпоративный прокси-сервер может потребоваться его настройка. Для этого можно добавить в файл `/etc/environment`следующие строки:
+>
+>``` shell
+>http_proxy="http://192.168.100.200:3128"
+>https_proxy="http://192.168.100.200:3128"
+>```
 
 Для сборки vcpkg в Ubuntu/Debian, дополнительно может потребоваться установить следующие зависимости:
 
 ```shell
 sudo apt-get install curl zip unzip tar
 ```
+
+Далее необходимо запустить bootstrap для системы на которой планируется использовать репозитарий (sh/bat). Для Linux это следующая команда: `./bootstrap-vcpkg.sh`
+
+В Microsoft Windows скрипт компиляции называется `e:\SourcesFromGit\vcpkg\bootstrap-vcpkg.bat`
+
+Если каких-то зависимостей не будет, скрипт выведет на экране вспомогательные команды, которые помогут установить необходимые компоненты.
 
 В случае успешной сборки, будут загружены дополнительные библиотеки и появится файл vcpkg.
 
@@ -283,6 +296,12 @@ vit-vit-ctpl[lockfree]                    Depends on Boost Lockfree Queue librar
 >```shell
 > ./vcpkg install boost-core boost-filesystem boost-system boost-thread:x64-linux
 >```
+>
+> Доставить program_options можно командой:
+>
+>```shell
+> ./vcpkg install boost-program-options:x64-linux
+>```
 
 ## Сборка проекта с использованием пакетов vcpkg
 
@@ -290,4 +309,24 @@ vit-vit-ctpl[lockfree]                    Depends on Boost Lockfree Queue librar
 
 ```shell
 cmake .. -DCMAKE_TOOLCHAIN_FILE=${FULL_SRC_PATH_PREFIX}/atms-vcpkg-n/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux
+```
+
+Примеры популярных пакетов:
+
+- c-ares - A C library for asynchronous DNS requests
+- protobuf - Protocol Buffers - Google's data interchange format
+- grpc - An RPC library and framework
+- spdlog - Very fast, header only, C++ logging library
+- gtest - GoogleTest and GoogleMock testing frameworks
+
+Установить их из vcpkg можно командой:
+
+```shell
+./vcpkg install c-ares protobuf grpc spdlog gtest
+```
+
+Для успешной сборки библиотек может потребоваться доустановить дополнительные пакеты, например:
+
+```shell
+sudo apt-get install pkg-config
 ```
