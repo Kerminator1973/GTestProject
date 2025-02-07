@@ -46,7 +46,7 @@ vcpkg install soci
 
 Некоторые библиотеки могут включать большое количество компонентов, установка всех компонентов может быть избыточной. Более того, некоторые из компонентов могут не собираться, что приведёт к ошибкам установки всего пакета. Пример - компонент поддержки Python в The Boost Library.
 
-Посмотреть, какие компонент доступны для библиотеки можно командой:
+Посмотреть, какие компоненты доступны для библиотеки можно командой:
 
 ```shell
 ./vcpkg search boost
@@ -270,4 +270,12 @@ vit-vit-ctpl[lockfree]                    Depends on Boost Lockfree Queue librar
 
 ```shell
 ./vcpkg install boost[core,filesystem,system,program_options,thread]:x64-linux
+```
+
+## Сборка проекта с использованием пакетов vcpkg
+
+Для использования библиотек собранных средствами vcpkg следует применить команду cmake с дополнительными параметрами:
+
+```shell
+cmake .. -DCMAKE_TOOLCHAIN_FILE=${FULL_SRC_PATH_PREFIX}/atms-vcpkg-n/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux
 ```
