@@ -12,13 +12,15 @@
 
 Поскольку целевыми платформами для разработчиков КБ ДОРС являюся как Microsoft Windows, так и разные дистрибутивы Linux, необходимым условием является применение системы сборки [CMake](https://cmake.org/). CMake анализирует окружение и генерирует подходящие для окружения скрипты сборки проекта.
 
-Для ознакомления с инструментом CMake рекомендуется к прочтению книга Rodovan Bast и Roberto Di Remigio «CMake Cookbook: Building, testing, and packaging modular software with modern CMake». Конспект книги на русском языке может быть запрошен у разработчиков КБ ДОРС.
+Для ознакомления с инструментом CMake рекомендуется к прочтению книга Rodovan Bast и Roberto Di Remigio "CMake Cookbook: Building, testing, and packaging modular software with modern CMake". Конспект книги на русском языке может быть запрошен у разработчиков КБ ДОРС.
 
 В качестве инструмента организации Unit-тестов рекомендуется использовать библиотеку [Google Test](https://github.com/google/googletest).
 
 Для сравнения эффективности разных вариантов реализации алгоритмов на C++ рекомендуется использовать [Google Benchmark](https://github.com/google/benchmark). В случае, если создание полноценной среды разработки нежелательно, можно использовать специализированный сайт [quick-bench.com/](https://quick-bench.com/), предоставляющий готовую к использованию среду online.
 
 Рекомендуется к ознакомлению [рецепт из книги](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-04) Rodovan Bast и Roberto Di Remigio, связанный с разработкой Unit-тестов. Так же кажется разумным озакомиться с книгой **Hands-On: Design Patterns with C++** by Fedor G. Pikus.
+
+При разработке ПО для Windows, допустимым является использование [Chocolatey](https://chocolatey.org/) - менеджера пакетов для Windows, работающего с разными языками программирования. Этот инструмент может быть очень полезным в случае потребности использования JS Interop. Например, если из JavaScript-кода требуется вызывать функции некоторой библиотеки, разработанной на C++.
 
 ## Тестовое задание для программиста на C++
 
