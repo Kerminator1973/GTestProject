@@ -272,6 +272,18 @@ vit-vit-ctpl[lockfree]                    Depends on Boost Lockfree Queue librar
 ./vcpkg install boost[core,filesystem,system,program_options,thread]:x64-linux
 ```
 
+> Хм. Столкнулся на практике, что vcpkg не позволяет использовать нижнее подчёркивание у "program_options". Вероятно, его нужно заменить на "program-options". По факту, попробовал выполнить следующую команду:
+>
+>```shell
+>./vcpkg install boost-core boost-filesystem boost-system boost-program-options boost-thread:x64-linux
+>```
+>
+> Получил ошибку сборки program_options. Если убрать program_options, то ПО устанавливается:
+>
+>```shell
+> ./vcpkg install boost-core boost-filesystem boost-system boost-thread:x64-linux
+>```
+
 ## Сборка проекта с использованием пакетов vcpkg
 
 Для использования библиотек собранных средствами vcpkg следует применить команду cmake с дополнительными параметрами:
