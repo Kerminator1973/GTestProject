@@ -305,13 +305,53 @@ vit-vit-ctpl[lockfree]                    Depends on Boost Lockfree Queue librar
 
 ## Сборка проекта с использованием пакетов vcpkg
 
-Для использования библиотек собранных средствами vcpkg следует применить команду cmake с дополнительными параметрами:
+Сборка проекта посредством cmake возможна и без явной загрузки зависимостей. Для этого в папке с файлом сборке "CMakeLists.txt" должен быть указан файл со списком необходимых библиотек. Файл называется "vcpkg.json". Пример файла:
 
-```shell
-cmake .. -DCMAKE_TOOLCHAIN_FILE=${FULL_SRC_PATH_PREFIX}/atms-vcpkg-n/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux
+```json
+{
+  "name": "atms-ihd",
+  "version": "0.0.1",
+  "dependencies": [
+    "spdlog",
+    "boost",
+    "gtest",
+    "protobuf",
+    "grpc",
+    "ms-gsl",
+    "nlohmann-json",
+    "rapidjson"
+  ],
+  "builtin-baseline": "bae8f8c7d837c631ca72daec4b14e243824135a5",
+  "overrides": [
+    {
+      "name": "spdlog",
+      "version": "1.11.0"
+    },
+    {
+      "name": "fmt",
+      "version": "9.1.0"
+    },
+    {
+      "name": "protobuf",
+      "version": "3.21.12"
+    },
+    {
+      "name": "grpc",
+      "version": "1.51.1"
+    }
+  ]
+}
 ```
 
-Примеры популярных пакетов:
+Сгенерировать скрипты сборки можно следующей командой:
+
+```shell
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/developer/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux
+```
+
+В этой команде нужно необходимо явно указать скрипт загрузки зависимостей посредством **vcpkg**.
+
+## Примеры популярных пакетов
 
 - c-ares - A C library for asynchronous DNS requests
 - protobuf - Protocol Buffers - Google's data interchange format
@@ -329,10 +369,4 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=${FULL_SRC_PATH_PREFIX}/atms-vcpkg-n/scripts/bui
 
 ```shell
 sudo apt-get install pkg-config
-```
-
-В случае, если необходимо загрузить пакет определённой версии, следует указать версию после символа @, например:
-
-```shell
-vcpkg install protobuf@3.21.12
 ```
