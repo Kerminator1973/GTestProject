@@ -370,3 +370,5 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/developer/vcpkg/scripts/buildsystems/vcpkg
 ```shell
 sudo apt-get install pkg-config
 ```
+
+К сожалению, [vcpkg не позволяет устанавливать](https://github.com/microsoft/vcpkg/issues/21357) специфическую версию библиотеки в _classic mode_. Vcpkg позволяет указать специфическую версию пакета только в _"manifest" mode_.
