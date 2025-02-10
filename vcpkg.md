@@ -330,3 +330,9 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=${FULL_SRC_PATH_PREFIX}/atms-vcpkg-n/scripts/bui
 ```shell
 sudo apt-get install pkg-config
 ```
+
+В случае, если необходимо загрузить пакет определённой версии, следует указать версию после символа @, например:
+
+```shell
+vcpkg install protobuf@3.21.12
+```
