@@ -281,31 +281,24 @@ vcpkg-boost              2024-05-15
 vit-vit-ctpl[lockfree]                    Depends on Boost Lockfree Queue library
 ```
 
-Чтобы исключить загрузку лишних компонентов можно указать конкретный набор необходимых нам библиотек. Пример:
+Чтобы исключить загрузку лишних компонентов можно загрузить только необходимые нам библиотеки. Например:
 
 ```shell
-./vcpkg install boost[core,filesystem,system,program_options,thread]:x64-linux
+./vcpkg install boost-core:x64-linux
+./vcpkg install boost-filesystem:x64-linux
+./vcpkg install boost-system:x64-linux
+./vcpkg install boost-program-options:x64-linux
+./vcpkg install boost-thread:x64-linux
+./vcpkg install c-ares:x64-linux
+./vcpkg install protobuf:x64-linux
+./vcpkg install grpc:x64-linux
+./vcpkg install spdlog:x64-linux
+./vcpkg install gtest:x64-linux
 ```
 
-> Хм. Столкнулся на практике, что vcpkg не позволяет использовать нижнее подчёркивание у "program_options". Вероятно, его нужно заменить на "program-options". По факту, попробовал выполнить следующую команду:
->
->```shell
->./vcpkg install boost-core boost-filesystem boost-system boost-program-options boost-thread:x64-linux
->```
->
-> Получил ошибку сборки program_options. Если убрать program_options, то ПО устанавливается:
->
->```shell
-> ./vcpkg install boost-core boost-filesystem boost-system boost-thread:x64-linux
->```
->
-> Доставить program_options можно командой:
->
->```shell
-> ./vcpkg install boost-program-options:x64-linux
->```
+Важно заметить, что если в имени заголовочного файла библиотеки использует символ подчеркивание (program_option), в имени пакета загружаемого посредством vcpkg следует использовать минус/тире (program-option).
 
-## Сборка проекта с использованием пакетов vcpkg
+## Сборка проекта с использованием манифеста пакетов (vcpkg.json)
 
 Сборка проекта посредством cmake возможна и без явной загрузки зависимостей (отдельными командами `vcpkg install`). Для этого в папке с файлом сборке "CMakeLists.txt" должен быть указан файл со списком необходимых библиотек. Файл называется "vcpkg.json". Пример файла:
 
