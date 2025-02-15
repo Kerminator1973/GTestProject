@@ -38,6 +38,12 @@ sudo apt install ninja-build
 sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 ```
 
+Также может потребоваться установка пакета pkg-config, который позволяет управлять ключами компиляции и флагами сборки (линковки). Установить его можно так:
+
+```shell
+sudo apt-get install pkg-config
+```
+
 Для работы с репозитарием библиотек следует клонировать из GitHub проект vcpkg:
 
 ```shell
