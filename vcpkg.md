@@ -44,6 +44,13 @@ sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 sudo apt-get install pkg-config
 ```
 
+>Чтобы получить ключи компиляции некоторого package, можно использовать параметр `--cflags`. Для получения ключей линковки, следует использовать параметр `--libs`:
+>
+>```shell
+>pkg-config --cflags glib-2.0
+>pkg-config --libs glib-2.0
+>```
+
 Для работы с репозитарием библиотек следует клонировать из GitHub проект vcpkg:
 
 ```shell
