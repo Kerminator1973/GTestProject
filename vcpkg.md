@@ -161,19 +161,30 @@ boost-beast              1.85.0#2         Boost beast module
 
 ```json
 {
-  "name": "atms-ihd",
+  "name": "adm-demo",
   "version": "0.0.1",
   "dependencies": [
     "spdlog",
-    "boost",
+    "boost-program-options",
+    "boost-locale",
+    "boost-filesystem",
+    "boost-uuid",
+    "boost-beast",
+    "boost-json",
+    "boost-signals2",
+    "boost-scope-exit",
     "gtest",
     "protobuf",
     "grpc",
+    {
+      "name": "grpc",
+      "features": [ "codegen" ]
+    },
     "ms-gsl",
     "nlohmann-json",
     "rapidjson"
   ],
-  "builtin-baseline": "bae8f8c7d837c631ca72daec4b14e243824135a5",
+  "builtin-baseline": "c43dbaeca0f96d90da29a151eb2ee14cad5f0aeb",
   "overrides": [
     {
       "name": "spdlog",
