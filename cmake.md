@@ -1,5 +1,7 @@
 # Из чего состоит CMakeLists.txt
 
+>28 марта 2025 года официально [выпущен CMake 4.0.0](https://www.kitware.com/cmake-4-0-0-available-for-download/).
+
 Создание файла "CMakeLists.txt" начинается с определения требований к версии CMake:
 
 ``` cmake
