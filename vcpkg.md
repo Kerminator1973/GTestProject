@@ -218,6 +218,16 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/developer/vcpkg/scripts/buildsystems/vcpkg
 
 **Triplet** объединяет окружение сборки (процессор, операционная система, компилятор, runtime, и т.д) в одно простое и удобное имя. В приведённом выше примере используется Triplet `x64-linux`, что означает - следует использовать библиотеку для Linux, для процессоров x86-64.
 
+>В "реальной жизни" всё немного по другому: для того, чтобы выполнить кросс-компиляцию не достаточно просто указать какой-то триплет - он либо должен настраивать среду сборки, либо настройка среды сборки должна быть осуществлена через параметры CMake. Пример генерации скриптов сборки для реального пакета:
+>
+>```shell
+>export CMAKE_SYSROOT="/home/developer/sysroot"
+>export ATMS_SYSROOT_DIR="/home/developer/sysroot"
+>export vcpkg_source_dir="/home/developer/vcpkg"
+>cmake .. -DCMAKE_TOOLCHAIN_FILE:STRING=${vcpkg_source_dir}/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=arm64-linux-atmos -DVCPKG_HOST_TRIPLET:STRING=x64-linux -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE:PATH=/opt/custom-triplets/arm64-cross-toolchain.cmake -DVCPKG_INSTALLED_DIR:PATH=${vcpkg_source_dir}/installed-arm64
+>cmake --build .
+>```
+
 Для формирования зависимостей используется понятие **port**, которое описывает способ сборки пакета. В папке ports хранятся скрипты CMake и json-файлы с описанием зависимостей библиотек.
 
 В случае, если собираемое приложение не поддерживает режим манифеста (пример манифеста приведён выше), может потребоваться использовать специализированную ревизию vcpkg, в которой настроено использование конкретных версий пакетов. Для переключения репозитария vcpkg на конкретную ревизию, может быть использована команда checkout (является устаревшей):
