@@ -2,6 +2,11 @@
 
 Базовая статья [The Key Differences Between C++14, C++17, and C++20](https://www.geeksforgeeks.org/cpp14-vs-cpp17-vs-cpp20/)
 
+Дополнительные статьи:
+
+- [Краткий обзор нововведений C++23: deducing this](https://habr.com/ru/articles/722668/)
+- [C++23 — финал, C++26 — начало](https://habr.com/ru/companies/yandex/articles/715358/)
+
 ## C++11 - фундаментально важный стандарт языка:
 
 - автоматические циклы for
@@ -92,3 +97,18 @@ generator<int> fibonacci() {
 ```
 
 Ключевые слова: co_yield и co_await.
+
+## C++23
+
+- Замена перегрузок &, const&, &&, const&& одной конструкцией
+- Замена CRTP (Curiously Recuring Template Pattern) на более вменяемую конструкцию
+- Рекурсивные лямбды
+- std::print()
+- std::expected
+
+## C++26
+
+- Улучшение читаемости кода с использованием std::tuple и std::pair посредством std::get и std::tuple_size
+- `#embed` - портирование многих новых feature из нового стандарта Си в C++
+- Получение std::stacktrace из исключений
+- Stackful-корутины
