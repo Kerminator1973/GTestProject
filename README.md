@@ -74,3 +74,12 @@ Microsoft Visual Studio Community Edition можно рассматривать 
 Пример [инструкции](https://github.com/Kerminator1973/GTestProject/blob/main/soci_build.md) по разработке консольного приложения на C++ с подключением к базе данных СУБД Postgres, с использованием библиотеки SOCI C++.
 
 Использование [vcpkg](https://github.com/Kerminator1973/GTestProject/blob/main/vcpkg.md) для загрузки и сборки популярных библиотек для C++. vcpkg - это package manager для C++.
+
+### Популярные библиотеки общего назначения
+
+- [Facebook's Folly](https://github.com/facebook/folly) - библиотека C++ 17 компонентов
+- [Electronica Art's EASTL](https://github.com/electronicarts/eastl) - библиотека контейнеров и алгоритмов STL
+- [Bloomberg's BDE](https://github.com/bloomberg/bde)
+- [Google's Abseil](https://abseil.io/)
+
+Рекомендуется ознакомиться с репозитарием [Awesome C++](https://github.com/fffaraz/awesome-cpp), который содержит огромный список C++ библиотек для решения самых разных задач.
