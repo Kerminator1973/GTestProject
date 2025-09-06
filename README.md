@@ -83,3 +83,7 @@ Microsoft Visual Studio Community Edition можно рассматривать 
 - [Google's Abseil](https://abseil.io/)
 
 Рекомендуется ознакомиться с репозитарием [Awesome C++](https://github.com/fffaraz/awesome-cpp), который содержит огромный список C++ библиотек для решения самых разных задач.
+
+Библиотека [POCO C++ Library](https://pocoproject.org/) мощная кросс-платформенная библиотека для разработки сетевых и ориентированных на использование Интернет приложений (Desktop, серверных, IoT, мобильных и embedded-систем).
+
+Яндекс выложил в open-source асинхронный фреймворк [UServer](https://github.com/userver-framework/userver), предназначенный для разработки высокопроизводительных микросервисов, сервисов и утилит на C++.
