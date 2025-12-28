@@ -45,3 +45,23 @@ int main() {
 template<class T, class... U>
     array(T, U...) -> array<T, 1 + sizeof...(U)>;
 ```
+
+Возможно использование конструкторов разных видов, как C-style, так и гораздо более лаконичного _Variadic constructor_:
+
+```cpp
+// Constructor from C-style array
+ArrayWrapper(const T(&arr)[N]) {
+    for (std::size_t i = 0; i < N; ++i) {
+        data[i] = arr[i];
+    }
+}
+
+// Variadic constructor
+template<typename... Args>
+ArrayWrapper(Args&&... args) : data{ std::forward<Args>(args)... } {
+    static_assert(sizeof...(args) == N, "Number of arguments must match array size");
+}
+
+// Default constructor
+ArrayWrapper() = default;
+```
