@@ -208,3 +208,57 @@ mkdir build && cd build
 cmake ..
 cmake --build .
 ```
+
+### Решение проблемы с загрузкой репозитария библиотеки с GitHub
+
+Обойти проблему с загрузкой репозитария с GitHub можно скачав zip-архив, собрав проект вручную и используя "CMakeLists.txt" с прямыми ссылками:
+
+```cmake
+cmake_minimum_required(VERSION 3.11)
+project(ftxui_demo)
+
+set(CMAKE_CXX_STANDARD 17)
+
+#include(FetchContent)
+
+#FetchContent_Declare(
+#  ftxui
+#  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+#  GIT_TAG v5.0.0
+#)
+#FetchContent_MakeAvailable(ftxui)
+
+# Add the FTXUI headers
+include_directories(
+    "d:/Sources/Playground/ftxui_demo/FTXUI/include"
+)
+
+# Locate the library files (adjust the path if they are in a different folder)
+set(FTXUI_LIB_DIR "d:/Sources/Playground/ftxui_demo/FTXUI/build/Debug")
+
+# Create imported targets for clarity (optional but recommended)
+add_library(ftxui-component STATIC IMPORTED)
+set_target_properties(ftxui-component PROPERTIES
+    IMPORTED_LOCATION "${FTXUI_LIB_DIR}/ftxui-component.lib"
+)
+
+add_library(ftxui-dom STATIC IMPORTED)
+set_target_properties(ftxui-dom PROPERTIES
+    IMPORTED_LOCATION "${FTXUI_LIB_DIR}/ftxui-dom.lib"
+)
+
+add_library(ftxui-screen STATIC IMPORTED)
+set_target_properties(ftxui-screen PROPERTIES
+    IMPORTED_LOCATION "${FTXUI_LIB_DIR}/ftxui-screen.lib"
+)
+
+add_executable(ftxui_demo main.cpp)
+target_link_libraries(ftxui_demo
+  PRIVATE         
+	ftxui-component
+    ftxui-dom
+    ftxui-screen
+)
+```
+
+Приложение под Windows прекрасно запускается из графического пользовательского интерфейса, но если запускать из консоли, то консоль тоже ломается, как и в Linux.
