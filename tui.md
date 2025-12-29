@@ -73,3 +73,131 @@ g++ hello_ftxui.cpp -std=c++20 -lftxui-component -lftxui-dom -lftxui-screen -pth
 ```
 
 Приложение работает, причём даже с мышкой, но при выходе ломает пользовательскую консоль. Также у приложения есть сложности с запуском из графической среды.
+
+Вернуть курсор можно активировав его вручную:
+
+```cpp
+auto quit_button = Button("Quit", [] { 
+    std::printf("\033[?25h");   // ANSI escape to show cursor
+    std::fflush(stdout);
+    std::exit(0); 
+});
+```
+
+### Чуть более сложное приложение
+
+```cpp
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/screen.hpp>
+#include <ftxui/component/captured_mouse.hpp>
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+
+using namespace ftxui;
+
+int main() {
+    // State variables
+    int counter = 0;
+    std::string input_text = "";
+    int selected_tab = 0;
+    bool checkbox_state = false;
+
+    // Create input component
+    auto input = Input(&input_text, "Type something...");
+
+    // Create buttons
+    auto button_increment = Button("Increment", [&] { counter++; });
+    auto button_decrement = Button("Decrement", [&] { counter--; });
+    auto button_reset = Button("Reset", [&] { counter = 0; });
+
+    // Create checkbox
+    auto checkbox = Checkbox("Enable feature", &checkbox_state);
+
+    // Create main container
+    auto container = Container::Vertical({
+        input,
+        Container::Horizontal({
+        button_increment,
+        button_decrement,
+        button_reset,
+        }),
+        checkbox,
+    });
+
+    // Create renderer
+    auto renderer = Renderer(container, [&] {
+        return vbox({
+        text("FTXUI Demo Application") | bold | center,
+        separator(),
+        hbox({
+            text("Counter: "),
+            text(std::to_string(counter)) | color(Color::Green) | bold,
+        }),
+        separator(),
+        hbox({
+            text("Input: "),
+            input->Render(),
+        }),
+        separator(),
+        hbox({
+            button_increment->Render(),
+            button_decrement->Render(),
+            button_reset->Render(),
+        }),
+        separator(),
+        checkbox->Render(),
+        separator(),
+        text("Status: " + std::string(checkbox_state ? "Enabled" : "Disabled")),
+        separator(),
+        text("Press 'q' to quit") | dim,
+        }) | border;
+    });
+
+    // Handle quit key
+    renderer |= CatchEvent([&](Event event) {
+        if (event == Event::Character('q')) {
+        exit(0);
+        return true;
+        }
+        return false;
+    });
+
+    auto screen = ScreenInteractive::Fullscreen();
+    screen.Loop(renderer);
+
+    return 0;
+}
+```
+
+Скрипт сборки приложения:
+
+```cmake
+cmake_minimum_required(VERSION 3.11)
+project(ftxui_demo)
+
+set(CMAKE_CXX_STANDARD 17)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+  GIT_TAG v5.0.0
+)
+FetchContent_MakeAvailable(ftxui)
+
+add_executable(ftxui_demo main.cpp)
+target_link_libraries(ftxui_demo
+  PRIVATE ftxui::screen
+  PRIVATE ftxui::dom
+  PRIVATE ftxui::component
+)
+```
+
+Команды сборки приложения:
+
+```shell
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
