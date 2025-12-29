@@ -84,6 +84,13 @@ auto quit_button = Button("Quit", [] {
 });
 ```
 
+Также решается shell-командой `reset`:
+
+```shell
+./ftxui_demo
+reset
+```
+
 ### Чуть более сложное приложение
 
 ```cpp
