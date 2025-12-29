@@ -163,8 +163,8 @@ int main() {
     // Handle quit key
     renderer |= CatchEvent([&](Event event) {
         if (event == Event::Character('q')) {
-        exit(0);
-        return true;
+            exit(0);
+            return true;
         }
         return false;
     });
@@ -261,4 +261,40 @@ target_link_libraries(ftxui_demo
 )
 ```
 
-Приложение под Windows прекрасно запускается из графического пользовательского интерфейса, но если запускать из консоли, то консоль тоже ломается, как и в Linux.
+Приложение под Windows прекрасно запускается из графического пользовательского интерфейса, но если запускать из консоли, то консоль тоже ломается, как и в Linux. И ещё это приложение захватывает мышь (_capture the mouse_).
+
+Пример приложения, которое корректно завершает свою работу:
+
+```cpp
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/dom/elements.hpp>
+
+int main() {
+    auto screen = ftxui::ScreenInteractive::TerminalOutput();
+
+    // Get the exit closure once at the start
+    auto exit = screen.ExitLoopClosure();
+
+    auto quit_button = ftxui::Button("Quit", exit);
+
+    auto component = ftxui::Container::Vertical({
+        ftxui::Renderer([] { return ftxui::text("Press the button to exit."); }),
+        quit_button,
+    });
+
+    // Add keyboard shortcut for quitting (e.g., 'q')
+    component |= ftxui::CatchEvent([&](ftxui::Event event) {
+        if (event == ftxui::Event::Character('q')) {
+            exit();
+            return true;
+        }
+        return false;
+    });
+
+    screen.Loop(component);
+
+    // Any cleanup code can go here, but FTXUI handles terminal reset automatically.
+    return 0;
+}
+```
