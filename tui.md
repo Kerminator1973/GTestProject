@@ -12,6 +12,8 @@
 
 Официальный репозитарий библиотеки [FTXUI](https://github.com/ArthurSonzogni/FTXUI).
 
+Ключевые особенности библиотеки **ftxui**: декларативное описание пользовательского интерфейса, поддержка стандартов C++17/20, используются widget-ы, большое количество элементов пользовательского интерфейса (включая анимацию) и существенно меньшее количество низко-уровневого кода, по сравнению с другими библиотеками.
+
 Сборка библиотеки под Linux:
 
 ```shell
@@ -21,7 +23,7 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 sudo cmake --build build --target install
 ```
 
-Последняя команда запускается с повышенными привелегиями для того, чтобы библиоеки были установлены в стандартные папки `/usr/local`
+Последняя команда запускается с повышенными привелегиями для того, чтобы библиотеки были установлены в стандартные папки `/usr/local`
 
 Пример приложения, которое корректно завершает свою работу, освобождая ресурсы, захватываемые приложением:
 
@@ -237,3 +239,12 @@ target_link_libraries(ftxui_demo
 ```
 
 Приложение под Windows прекрасно запускается из графического пользовательского интерфейса.
+
+## Другие TUI-библиотеки
+
+Также распространёнными считаются следующие библиотеки:
+
+- ncurses - Full screen handling, panels, forms, menus, color support. Classic terminal apps (editors, file managers)
+- termbox‑go - C, C++ wrappers. Minimalist, event‑driven, works on Windows/Linux/macOS. Simple TUIs, games
+- curses‑pp - Object‑oriented wrapper around ncurses. Cleaner C++ code, RAII
+- libtcod - Tile‑based rendering, keyboard/mouse, used in roguelikes. Game‑oriented terminal graphics
