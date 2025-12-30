@@ -86,27 +86,28 @@ using namespace ftxui;
 int main() {
     auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
-    // Get the exit closure once at the start
+    // Ключевой момент: при выходе объекта exit из scope, очередь сообщений будет
+    // уничтижена, все ресурсы будут освобождены
     auto exit = screen.ExitLoopClosure();
 
-    // State variables
+    // Переменные, определяющие состояние приложения (State variables)
     int counter = 0;
     std::string input_text = "";
     int selected_tab = 0;
     bool checkbox_state = false;
 
-    // Create input component
+    // Создаём объект для ввода текстовых данных
     auto input = Input(&input_text, "Type something...");
 
-    // Create buttons
+    // Создаём кнопки и добавляем для каждой из них обработчик нажатия
     auto button_increment = Button("Increment", [&] { counter++; });
     auto button_decrement = Button("Decrement", [&] { counter--; });
     auto button_reset = Button("Reset", [&] { counter = 0; });
 
-    // Create checkbox
+    // Добавляем check-box и привязываем к нему state-переменную
     auto checkbox = Checkbox("Enable feature", &checkbox_state);
 
-    // Create main container
+    // Основной контейнер пользовательских элементов - горизонтальный
     auto container = Container::Vertical({
         input,
         Container::Horizontal({
@@ -117,47 +118,51 @@ int main() {
         checkbox,
     });
 
-    // Create renderer
+    // Определяем композицию пользовательских элементов (Renderer)
     auto renderer = Renderer(container, [&] {
         return vbox({
-        text("FTXUI Demo Application") | bold | center,
-        separator(),
-        hbox({
-            text("Counter: "),
-            text(std::to_string(counter)) | color(Color::Green) | bold,
-        }),
-        separator(),
-        hbox({
-            text("Input: "),
-            input->Render(),
-        }),
-        separator(),
-        hbox({
-            button_increment->Render(),
-            button_decrement->Render(),
-            button_reset->Render(),
-        }),
-        separator(),
-        checkbox->Render(),
-        separator(),
-        text("Status: " + std::string(checkbox_state ? "Enabled" : "Disabled")),
-        separator(),
-        text("Press 'q' to quit") | dim,
-            }) | border;
+            text("FTXUI Demo Application") | bold | center,
+            separator(),
+            hbox({
+                text("Counter: "),
+                text(std::to_string(counter)) | color(Color::Green) | bold,
+            }),
+            separator(),
+            hbox({
+                text("Input: "),
+                input->Render(),
+            }),
+            separator(),
+            hbox({
+                button_increment->Render(),
+                button_decrement->Render(),
+                button_reset->Render(),
+            }),
+            separator(),
+            checkbox->Render(),
+            separator(),
+            text("Status: " + std::string(checkbox_state ? "Enabled" : "Disabled")),
+            separator(),
+            text("Press 'q' to quit") | dim,
+                }) | border;
         });
 
-    // Handle quit key
+    // Конфигурируем обработчики очереди сообщений, в которых нас интересует кнопка 'q',
+    // при надатии на котороую требуется завершить работу приложения
     renderer |= CatchEvent([&](Event event) {
+
         if (event == Event::Character('q')) {
             std::exit(0);
             return true;
         }
-        return false;
-        });
 
+        return false;
+    });
+
+    // Создаём очередь сообщений и запускаем основной цикл для определённых нами элементов
+    // пользовательского интерфейса
     screen.Loop(renderer);
 
-    // Any cleanup code can go here, but FTXUI handles terminal reset automatically.
     return 0;
 }
 ```
