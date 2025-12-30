@@ -23,40 +23,39 @@ sudo cmake --build build --target install
 
 Последняя команда запускается с повышенными привелегиями для того, чтобы библиоеки были установлены в стандартные папки `/usr/local`
 
-Пример приложения:
+Пример приложения, которое корректно завершает свою работу, освобождая ресурсы, захватываемые приложением:
 
 ```cpp
-// hello_ftxui.cpp
-#include <ftxui/component/component.hpp>   // Component utilities
-#include <ftxui/component/screen_interactive.hpp> // Main loop
-#include <ftxui/dom/elements.hpp>          // UI elements
-
-using namespace ftxui;
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/dom/elements.hpp>
 
 int main() {
-    // --- State ---------------------------------------------------------
-    int counter = 0;
+    auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
-    // --- UI elements ----------------------------------------------------
-    auto counter_text = Renderer([&] {
-        return text("Counter: " + std::to_string(counter)) | bold;
-    });
+    // Get the exit closure once at the start
+    auto exit = screen.ExitLoopClosure();
 
-    auto inc_button = Button("Increase", [&] { ++counter; });
-    auto dec_button = Button("Decrease", [&] { --counter; });
-    auto quit_button = Button("Quit", [] { std::exit(0); });
+    auto quit_button = ftxui::Button("Quit", exit);
 
-    // Layout: vertical box with spacing
-    auto layout = Container::Vertical({
-        counter_text,
-        inc_button,
-        dec_button,
+    auto component = ftxui::Container::Vertical({
+        ftxui::Renderer([] { return ftxui::text("Press the button to exit."); }),
         quit_button,
     });
 
-    // --- Main loop ------------------------------------------------------
-    auto screen = ScreenInteractive::TerminalOutput();
-    screen.Loop(layout);
+    // Add keyboard shortcut for quitting (e.g., 'q')
+    component |= ftxui::CatchEvent([&](ftxui::Event event) {
+        if (event == ftxui::Event::Character('q')) {
+            exit();
+            return true;
+        }
+        return false;
+    });
+
+    screen.Loop(component);
+
+    // Any cleanup code can go here, but FTXUI handles terminal reset automatically.
+    return 0;
 }
 ```
 
@@ -72,37 +71,22 @@ g++ hello_ftxui.cpp -std=c++20 -lftxui-component -lftxui-dom -lftxui-screen -pth
 ./hello_ftxui
 ```
 
-Приложение работает, причём даже с мышкой, но при выходе ломает пользовательскую консоль. Также у приложения есть сложности с запуском из графической среды.
-
-Вернуть курсор можно активировав его вручную:
+## Более сложное приложение
 
 ```cpp
-auto quit_button = Button("Quit", [] { 
-    std::printf("\033[?25h");   // ANSI escape to show cursor
-    std::fflush(stdout);
-    std::exit(0); 
-});
-```
-
-Также решается shell-командой `reset`:
-
-```shell
-./ftxui_demo
-reset
-```
-
-### Чуть более сложное приложение
-
-```cpp
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/screen/screen.hpp>
-#include <ftxui/component/captured_mouse.hpp>
 #include <ftxui/component/component.hpp>
+#include <ftxui/dom/elements.hpp>
 #include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/component/captured_mouse.hpp>
 
 using namespace ftxui;
 
 int main() {
+    auto screen = ftxui::ScreenInteractive::TerminalOutput();
+
+    // Get the exit closure once at the start
+    auto exit = screen.ExitLoopClosure();
+
     // State variables
     int counter = 0;
     std::string input_text = "";
@@ -124,9 +108,9 @@ int main() {
     auto container = Container::Vertical({
         input,
         Container::Horizontal({
-        button_increment,
-        button_decrement,
-        button_reset,
+            button_increment,
+            button_decrement,
+            button_reset,
         }),
         checkbox,
     });
@@ -157,21 +141,21 @@ int main() {
         text("Status: " + std::string(checkbox_state ? "Enabled" : "Disabled")),
         separator(),
         text("Press 'q' to quit") | dim,
-        }) | border;
-    });
+            }) | border;
+        });
 
     // Handle quit key
     renderer |= CatchEvent([&](Event event) {
         if (event == Event::Character('q')) {
-            exit(0);
+            std::exit(0);
             return true;
         }
         return false;
-    });
+        });
 
-    auto screen = ScreenInteractive::Fullscreen();
     screen.Loop(renderer);
 
+    // Any cleanup code can go here, but FTXUI handles terminal reset automatically.
     return 0;
 }
 ```
@@ -209,7 +193,7 @@ cmake ..
 cmake --build .
 ```
 
-### Решение проблемы с загрузкой репозитария библиотеки с GitHub
+### Решение проблемы с загрузкой репозитария библиотеки с GitHub (костыль)
 
 Обойти проблему с загрузкой репозитария с GitHub можно скачав zip-архив, собрав проект вручную и используя "CMakeLists.txt" с прямыми ссылками:
 
@@ -218,15 +202,6 @@ cmake_minimum_required(VERSION 3.11)
 project(ftxui_demo)
 
 set(CMAKE_CXX_STANDARD 17)
-
-#include(FetchContent)
-
-#FetchContent_Declare(
-#  ftxui
-#  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-#  GIT_TAG v5.0.0
-#)
-#FetchContent_MakeAvailable(ftxui)
 
 # Add the FTXUI headers
 include_directories(
@@ -261,40 +236,4 @@ target_link_libraries(ftxui_demo
 )
 ```
 
-Приложение под Windows прекрасно запускается из графического пользовательского интерфейса, но если запускать из консоли, то консоль тоже ломается, как и в Linux. И ещё это приложение захватывает мышь (_capture the mouse_).
-
-Пример приложения, которое корректно завершает свою работу:
-
-```cpp
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/dom/elements.hpp>
-
-int main() {
-    auto screen = ftxui::ScreenInteractive::TerminalOutput();
-
-    // Get the exit closure once at the start
-    auto exit = screen.ExitLoopClosure();
-
-    auto quit_button = ftxui::Button("Quit", exit);
-
-    auto component = ftxui::Container::Vertical({
-        ftxui::Renderer([] { return ftxui::text("Press the button to exit."); }),
-        quit_button,
-    });
-
-    // Add keyboard shortcut for quitting (e.g., 'q')
-    component |= ftxui::CatchEvent([&](ftxui::Event event) {
-        if (event == ftxui::Event::Character('q')) {
-            exit();
-            return true;
-        }
-        return false;
-    });
-
-    screen.Loop(component);
-
-    // Any cleanup code can go here, but FTXUI handles terminal reset automatically.
-    return 0;
-}
-```
+Приложение под Windows прекрасно запускается из графического пользовательского интерфейса.
