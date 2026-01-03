@@ -87,7 +87,7 @@ int main() {
     auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
     // Ключевой момент: при выходе объекта exit из scope, очередь сообщений будет
-    // уничтижена, все ресурсы будут освобождены
+    // уничтожена, все ресурсы будут освобождены
     auto exit = screen.ExitLoopClosure();
 
     // Переменные, определяющие состояние приложения (State variables)
@@ -244,6 +244,102 @@ target_link_libraries(ftxui_demo
 ```
 
 Приложение под Windows прекрасно запускается из графического пользовательского интерфейса.
+
+## Добавление модальных диалогов
+
+Пример реализации модального диалога приведен в примере "\ftxui-src\examples\component\modal_dialog.cpp".
+
+Для добавления модального диалога необходимо добавить состояние (modal_shown), отвечающее за отображение/сокрытие модального диалога, а также необходимые для его использования лямбда-функции:
+
+```cpp
+auto screen = ftxui::ScreenInteractive::TerminalOutput();
+
+// Состояние отображения модального диалога
+bool modal_shown = false;
+
+// Действия, которые выполняются при управлении состоянием модального диалога
+auto show_modal = [&] { modal_shown = true; };
+auto hide_modal = [&] { modal_shown = false; };
+
+// Ключевой момент: при выходе объекта exit из scope, очередь сообщений будет
+// уничтожена, все ресурсы будут освобождены
+auto exit = screen.ExitLoopClosure();
+
+// Загрушки
+auto do_nothing = [&] {};
+```
+
+Далее, определяем объект-кнопку, при нажатии на которую будет открываться модальный диалог:
+
+```cpp
+auto button_modal = Button("Show modal", show_modal);
+```
+
+Включаем эту кнопку в один из контейнеров основной формы:
+
+```cpp
+    auto container = Container::Vertical({
+        input,
+        Container::Horizontal({
+            button_increment,
+            button_decrement,
+            button_reset,
+			button_modal,   // <--
+        }),
+        checkbox,
+    });
+```
+
+Активируем рендеринг в вызове Renderer():
+
+```cpp
+hbox({
+    button_increment->Render(),
+    button_decrement->Render(),
+    button_reset->Render(),
+    button_modal->Render()  // <-->
+}),
+```
+
+Добавляем реализацию модального диалога:
+
+```cpp
+// Определяем стиль отображения кнопок
+auto button_style = ButtonOption::Animated();
+
+Component ModalComponent(std::function<void()> do_nothing,
+                         std::function<void()> hide_modal) 
+{
+    // В модальном диалоге будет две кнопки. Мы указываем стиль кнопки как
+    // ButtonOption::Animated(), чтобы убрать рамки вокруг этих кнопок и сделать их
+    // более похожим на контекстное меню
+    auto component = Container::Vertical({
+        Button("Do nothing", do_nothing, button_style),
+        Button("Quit modal", hide_modal, button_style),
+    });
+
+    // Добавляем правила рендеринга этих кнопок
+    component |= Renderer([&](Element inner) {
+    return vbox({
+                text("Modal component "),
+                separator(),
+                inner,
+            })
+            | size(WIDTH, GREATER_THAN, 30)
+            | border;
+    });
+    return component;
+}
+```
+
+Добавляем модальный диалог к рендеру основного диалога:
+
+```cpp
+auto modal_component = ModalComponent(do_nothing, hide_modal);
+renderer |= Modal(modal_component, &modal_shown);
+
+screen.Loop(renderer);
+```
 
 ## Другие TUI-библиотеки
 
