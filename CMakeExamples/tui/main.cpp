@@ -50,6 +50,10 @@ int main() {
     int selected_tab = 0;
     bool checkbox_state = false;
 
+    // Переменная для gauge (используем atomic для потокобезопасности)
+    std::atomic<float> gauge_value = 0.0f;
+    std::atomic<bool> timer_running = true;
+
     // Создаём объект для ввода текстовых данных
     auto input = Input(&input_text, "Type something...");
 
@@ -100,6 +104,13 @@ int main() {
             separator(),
             text("Status: " + std::string(checkbox_state ? "Enabled" : "Disabled")),
             separator(),
+            // Добавляем gauge
+            hbox({
+                text("Progress: "),
+                gauge(gauge_value.load()) | flex,
+            }),
+            text("  " + std::to_string(int(gauge_value.load() * 100)) + "%") | center,
+            separator(),
             text("Press 'q' to quit") | dim,
                 }) | border;
         });
@@ -124,10 +135,33 @@ int main() {
 	// not.
 	renderer |= Modal(modal_component, &modal_shown);
 	
+    // Запускаем таймер в отдельном потоке
+    std::thread timer_thread([&]() {
+        while (timer_running) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+            // Увеличиваем значение gauge
+            gauge_value = gauge_value.load() + 0.01f;
+
+            // Сбрасываем при достижении 1.0
+            if (gauge_value >= 1.0f) {
+                gauge_value = 0.0f;
+            }
+
+            // Запрашиваем перерисовку экрана
+            screen.Post(Event::Custom);
+        }
+    });
 
     // Создаём очередь сообщений и запускаем основной цикл для определённых нами элементов
     // пользовательского интерфейса
     screen.Loop(renderer);
+
+    // Ожидаем завершения потока таймера
+    timer_running = false;
+    if (timer_thread.joinable()) {
+        timer_thread.join();
+    }
 
     return 0;
 }
