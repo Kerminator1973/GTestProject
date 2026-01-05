@@ -151,3 +151,20 @@ int main() {
     return 0;
 }
 ```
+
+## Где ещё можно использовать std::optional
+
+Мы можем хранить атрибуты класса/структуры как std::optional, например:
+
+```cpp
+struct Item {
+    std::string name;
+    std::optional<std::string> photo_url;
+    std::string description;
+    std::optional<float> price;
+    time_point<system_clock> date_added{};
+    bool featured{};
+}
+```
+
+Таким образом мы можем точно различать поля, которые не были заданы пользователем и соответствующим образом реагировать на них в коде.
