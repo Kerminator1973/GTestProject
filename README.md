@@ -80,7 +80,7 @@ Microsoft Visual Studio Community Edition можно рассматривать 
 - [Facebook's Folly](https://github.com/facebook/folly) - библиотека C++ 17 компонентов
 - [Electronica Art's EASTL](https://github.com/electronicarts/eastl) - библиотека контейнеров и алгоритмов STL
 - [Bloomberg's BDE](https://github.com/bloomberg/bde)
-- [Google's Abseil](https://abseil.io/)
+- [Google's Abseil](https://abseil.io/). В частности, библиотека реализует absl::optional, позволяя получать функционал близкий к стандарту C++17 на старых компиляторах. Вероятно (нужно проверять), что Abseil используется как зависимость в protobuf/grpc
 
 Рекомендуется ознакомиться с репозитарием [Awesome C++](https://github.com/fffaraz/awesome-cpp), который содержит огромный список C++ библиотек для решения самых разных задач.
 
