@@ -341,6 +341,28 @@ renderer |= Modal(modal_component, &modal_shown);
 screen.Loop(renderer);
 ```
 
+## Другие органы управления
+
+В примерах пользовательского интерфейса есть gauge, также известный как "progress bar":
+
+```cpp
+vbox({
+    hbox({
+        text("one") | border,
+        text("two") | border | flex,
+        text("three") | border | flex,
+    }),
+
+    gauge(0.25) | color(Color::Red),
+    gauge(0.50) | color(Color::White),
+    gauge(0.75) | color(Color::Blue),
+});
+```
+
+Его можно использовать для демонстрации прогресса, например, при обновлении прибора BVS.
+
+Для отображения изменяемых данных, вероятно, можно использовать таблицу (Table).
+
 ## Другие TUI-библиотеки
 
 Также распространёнными считаются следующие библиотеки:
