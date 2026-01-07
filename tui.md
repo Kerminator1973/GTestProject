@@ -422,6 +422,68 @@ if (timer_thread.joinable()) {
 
 Для отображения изменяемых данных, вероятно, можно использовать таблицу (Table).
 
+## Динамическое добавление органов управления в UI
+
+Для того, чтобы динамически изменять пользовательский интерфейс, добавляя/удаляя в него новые элементы, рекомендуется создать пустой контейнер (например, `Container::Horizontal({})`) и формировать его содержимое, используя функцию Add():
+
+```cpp
+// Динамический контейнер для кнопок
+auto buttons_container = Container::Horizontal({});
+
+// Создаём кнопки и добавляем их в динамический контейнер
+auto button_increment = Button("Increment", [&] { counter++; });
+auto button_decrement = Button("Decrement", [&] { counter--; });
+auto button_reset = Button("Reset", [&] { counter = 0; });
+auto button_modal = Button("Show modal", show_modal);
+
+// Кнопка-триггер для добавления двух новых кнопок
+auto button_add = Button("Add two buttons", [&] {
+    // Создаём две новые кнопки (с пустыми обработчиками для примера)
+    auto new_button1 = Button("New button 1", [] { /* Действие для новой кнопки 1 */ });
+    auto new_button2 = Button("New button 2", [] { /* Действие для новой кнопки 2 */ });
+
+    // Добавляем их в динамический контейнер
+    buttons_container->Add(new_button1);
+    buttons_container->Add(new_button2);
+
+    // Запрашиваем перерисовку экрана
+    screen.Post(Event::Custom);
+});
+
+// Изначально добавляем все кнопки в контейнер
+buttons_container->Add(button_increment);
+buttons_container->Add(button_decrement);
+buttons_container->Add(button_reset);
+buttons_container->Add(button_modal);
+buttons_container->Add(button_add);  // Добавляем кнопку-триггер
+```
+
+Ключевое действие - оправка сообщения перерисовки пользовательского интерфейса - `screen.Post(Event::Custom);`.
+
+Описание основного контейнера можно сохранить неизменным:
+
+```cpp
+auto container = Container::Vertical({
+    input,
+    buttons_container,  // Однако теперь мы используем динамический контейнер
+    checkbox,
+});
+```
+
+Чтобы интерфейс перерисовывался, необходимо включить созданный контейнер в Renderer() и вызывать из него функцию рендеринга динамического контейнера:
+
+```cpp
+auto renderer = Renderer(container, [&] {
+    return vbox({
+        text("FTXUI Demo Application") | bold | center,
+        ...
+        buttons_container->Render(),  // Теперь рендерим динамический контейнер с кнопками
+```
+
+В реальных задачах логика будет более сложной - в частности необходимо недопускать добавление кнопок несколько раз, а возможно, и удалять кнопки из пользовательского интерфейса.
+
+Следует заметить, что динамическое формирование пользовательского интерфейса нарушает парадигму декларативного описания UI, реализованного в библиотеке ftxui.
+
 ## Другие TUI-библиотеки
 
 Также распространёнными считаются следующие библиотеки:
