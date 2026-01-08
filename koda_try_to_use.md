@@ -200,6 +200,8 @@ target_link_libraries(${PROJECT_NAME}
 )
 ```
 
+Скрипт CMake типовой, версия CMake, кажется, выбрана случайно - 3.14.
+
 Программный код:
 
 ```cpp
@@ -242,7 +244,18 @@ int main() {
 }
 ```
 
-Инструкции по сборке:
+Код очень эффектный. Генератор учёл необходимость вызова ExitLoopClosure() при выходе из приложения - именно это было основной ошибкой двух предыдущих экспериментов.
+
+Объяснение про `screen.ExitLoopClosure()();` - Это не опечатка, а специальный паттерн в FTXUI:
+
+- screen.ExitLoopClosure() возвращает функцию (замыкание типа `std::function<void()>`)
+- Вторая пара скобок () вызывает эту возвращённую функцию
+
+Такой подход позволяет передавать "инструкцию выхода" в другие части кода, не предоставляя им прямой доступ к объекту screen. Это безопасный механизм обратного вызова.
+
+>Замечу! Kimi K2 здесь меня обыграла, я этого паттерна не знал. Kimi K2 сделала всё абсолютно корректно и красиво.
+
+Инструкции по сборке простая, рациональная и правильная:
 
 ```shell
 mkdir build
@@ -250,6 +263,135 @@ cd build
 cmake ..
 cmake --build .
 ```
+
+### Добавление динамического поведения
+
+>Добавь в приложение ещё одну кнопку, при нажатии на которую будет динамически добавляться gauge, отображающий прогресс некоторой задачи, исполняемой в течение 20 секунд. Как только gauge дойдёт до 100% он должен быть удалён из пользовательского интерфейса приложения.
+
+К сожалению, на этом запросе Kimi 2 сгенерировал две ошибки. Первая ошибка - некорректный захват переменной screen в лямбде:
+
+```cpp
+std::thread([&, screen]{  // ❌ ОШИБКА: screen копируется
+```
+
+Простое правильное решение:
+
+```cpp
+std::thread([&]{  // ✅ ПРАВИЛЬНО: все переменные по ссылке
+```
+
+Kimi K2 сам исправил эту ошибку.
+
+Вторая ошибка - ошибка компиляции:
+
+```output
+D:\Sources\KodaTUI\src\main.cpp(83,17): error C2039: 'Add': is not a member of 'ftxui::Node' [D:\Sources\KodaTUI\build\tui_app.vcxproj]   
+      D:\Sources\KodaTUI\build\_deps\ftxui-src\include\ftxui\dom\node.hpp(22,7):
+      see declaration of 'ftxui::Node'
+```
+
+Её Kimi K2 так же успешно исправил.
+
+После небольших правок код, получившийся результат выглядит следующим образом:
+
+```cpp
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/loop.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <thread>
+#include <chrono>
+
+using namespace ftxui;
+
+int main() {
+    auto screen = ScreenInteractive::TerminalOutput();
+
+    // Состояние прогресса задачи
+    struct {
+        int percentage = 0;
+        bool active = false;
+    } progress;
+
+    // Вторая кнопка - запуск задачи
+    auto buttonRunGauge = Button("Запустить задачу", [&]{
+        if (!progress.active) {
+            progress.active = true;
+            progress.percentage = 0;
+
+            // Запускаем задачу в отдельном потоке
+            std::thread([&]{
+                for (int i = 0; i <= 100; i++) {
+                    // Обновляем прогресс в UI-потоке (i по значению!)
+                    screen.Post([&, i]{
+                        progress.percentage = i;
+                        if (i == 100) {
+                            progress.active = false;
+                        }
+                    });
+                    
+                    // Триггерим перерисовку
+                    screen.Post(Event::Custom);
+                    
+                    // 20 секунд / 100 шагов = 200 мс на шаг
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }
+            }).detach();
+        }
+    });
+
+    // Компонент gauge (рендерится только при активной задаче)
+    auto gauge_component = Renderer([&]{
+        if (!progress.active) {
+            return text(""); // Не рендерим ничего
+        }
+        return vbox({
+            text("Прогресс задачи:"),
+            gauge(progress.percentage),
+            text(std::to_string(progress.percentage) + "%")
+        });
+    });
+
+    // Основной контейнер с кнопкой запуска приложения
+    auto container = Container::Vertical({
+        buttonRunGauge
+    });
+
+    // Рендерер всего UI
+    auto component = Renderer(container, [&]{
+        std::vector<Element> elements = {
+            text("Приложение с индикатором прогресса"),
+            separator(),
+            buttonRunGauge->Render(),
+            separator(),
+        };
+        
+        // Динамически добавляем gauge, если задача активна
+        if (progress.active) {
+            elements.push_back(gauge_component->Render());
+            elements.push_back(separator());
+        }
+
+        elements.push_back(text("Нажмите 'q' для выхода"));
+        
+        return vbox(elements) | border;
+    });
+
+    // Обработчик выхода по клавише 'q'
+    auto event_handler = CatchEvent(component, [&](Event event) {
+        if (event.character() == "q" || event.character() == "Q") {
+            screen.ExitLoopClosure()();
+            return true;
+        }
+        return false;
+    });
+
+    screen.Loop(event_handler);
+
+    return 0;
+}
+```
+
+Приложение работает корректно. Качество исполнения вызывает восхищение - код простой и очень эффективный.
 
 ## Результат
 
