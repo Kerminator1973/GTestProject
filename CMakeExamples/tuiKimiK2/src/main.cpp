@@ -3,77 +3,117 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <mutex>
+#include <atomic>
 
 using namespace ftxui;
 
 int main() {
     auto screen = ScreenInteractive::TerminalOutput();
 
-    // Состояние прогресса задачи
-    struct {
+    // Структура для отслеживания задачи
+    struct ProgressTask {
+        int id;
         int percentage = 0;
-        bool active = false;
-    } progress;
+        bool active = true;
+    };
 
-    // Вторая кнопка - запуск задачи
+    // Вектор активных задач и мьютекс для потокобезопасности
+    std::vector<ProgressTask> tasks;
+    std::mutex tasks_mutex;
+    std::atomic<int> next_task_id{1};
+
+    // Кнопка запуска новой задачи
     auto buttonRunGauge = Button("Запустить задачу", [&]{
-        if (!progress.active) {
-            progress.active = true;
-            progress.percentage = 0;
+        // Создаём новую задачу
+        ProgressTask new_task;
+        new_task.id = next_task_id++;
+        
+        // Добавляем задачу в вектор (потокобезопасно)
+        {
+            std::lock_guard<std::mutex> lock(tasks_mutex);
+            tasks.push_back(new_task);
+        }
 
-            // Запускаем задачу в отдельном потоке
-            std::thread([&]{
-                for (int i = 0; i <= 100; i++) {
-                    // Обновляем прогресс в UI-потоке (i по значению!)
-                    screen.Post([&, i]{
-                        progress.percentage = i;
-                        if (i == 100) {
-                            progress.active = false;
+        // Запускаем задачу в отдельном потоке
+        std::thread([&, task_id = new_task.id]{
+            for (int i = 0; i <= 100; i++) {
+                // Обновляем прогресс в UI-потоке
+                screen.Post([&, task_id, i]{
+                    std::lock_guard<std::mutex> lock(tasks_mutex);
+                    for (auto& task : tasks) {
+                        if (task.id == task_id) {
+                            task.percentage = i;
+                            if (i == 100) {
+                                task.active = false;
+                            }
+                            break;
                         }
-                    });
-                    
-                    // Триггерим перерисовку
-                    screen.Post(Event::Custom);
-                    
-                    // 20 секунд / 100 шагов = 200 мс на шаг
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                }
-            }).detach();
-        }
+                    }
+                });
+                
+                // Триггерим перерисовку
+                screen.Post(Event::Custom);
+                
+                // 20 секунд / 100 шагов = 200 мс на шаг
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            }
+        }).detach();
     });
 
-    // Компонент gauge (рендерится только при активной задаче)
+    // Компонент для рендеринга всех gauge
     auto gauge_component = Renderer([&]{
-        if (!progress.active) {
-            return text(""); // Не рендерим ничего
+        std::lock_guard<std::mutex> lock(tasks_mutex);
+        
+        // Удаляем неактивные задачи
+        tasks.erase(
+            std::remove_if(tasks.begin(), tasks.end(), 
+                [](const ProgressTask& task) { return !task.active; }),
+            tasks.end()
+        );
+        
+        // Если нет задач, возвращаем пустой элемент
+        if (tasks.empty()) {
+            return text("");
         }
-        return vbox({
-            text("Прогресс задачи:"),
-            gauge(progress.percentage),
-            text(std::to_string(progress.percentage) + "%")
-        });
+        
+        // Создаём вектор элементов для всех активных задач
+        std::vector<Element> gauge_elements;
+        for (const auto& task : tasks) {
+            gauge_elements.push_back(
+                vbox({
+                    text("Задача #" + std::to_string(task.id) + ":"),
+                    gauge((float(task.percentage)) / 100),
+                    text(std::to_string(task.percentage) + "%")
+                })
+            );
+            gauge_elements.push_back(separator());
+        }
+        
+        // Удаляем последний лишний separator
+        gauge_elements.pop_back();
+        
+        return vbox(gauge_elements);
     });
 
-    // Основной контейнер с кнопкой запуска приложения
+    // Основной контейнер с обеими кнопками
     auto container = Container::Vertical({
         buttonRunGauge
     });
 
-    // Рендерер всего UI
+    // Рендерер всего UI (БЕЗ захвата mutex!)
     auto component = Renderer(container, [&]{
         std::vector<Element> elements = {
-            text("Приложение с индикатором прогресса"),
+            text("Приложение с множественными задачами"),
             separator(),
             buttonRunGauge->Render(),
             separator(),
         };
         
-        // Динамически добавляем gauge, если задача активна
-        if (progress.active) {
-            elements.push_back(gauge_component->Render());
-            elements.push_back(separator());
-        }
-
+        // ВСЕГДА добавляем gauge_component, он сам захватит mutex внутри
+        elements.push_back(gauge_component->Render());
+        
         elements.push_back(text("Нажмите 'q' для выхода"));
         
         return vbox(elements) | border;
