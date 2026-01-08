@@ -159,10 +159,98 @@ struct ScreenExit {
 - Koda предлагает множество ИИ, включая: Minimax-m2.1, Gemini 2.5 Flash, DeepSeek V3.2, GIM 4.7, QWEN3, QWEN Coder, Kimi K2 Thinking. По большей части, модели устаревшие
 - Есть "Koda Agent", который умеет работать по протоколу MCP
 
-Не пробовал, но, гипотетически, можно добавить в запрос следующий текст:
+## Третья попытка создания приложения с использоанием Kimi K2
 
->Изучи документ по ссылке: .... На его основе предложи улучшение для ...
+При использовании Kimi K2 расходуются токены. Тестовое количество токенов - 1000.
+
+>Изучи документ по ссылке: https://github.com/Kerminator1973/GTestProject/blob/main/tui.md
+Создай проект на C++ для операционной системы Windows. В проекте должна использоваться система сборки CMake. Компилятор и CMake уже установлены в системе. Приложение должно реализовывать TUI-интерфейс с использованием библиотеки ftxui. Сгенерируй мне файл CMakeLists.txt для загрузки ftxui из репозитария на github и простое приложение в котором будет добавлена одна экранная кнопка, а также будет осуществляться выход из приложения при нажатии на кнопку 'q' на клавиатуре
+
+Kimi K2 создал полноценно работающее приложение.
+
+Содержимое файла "CMakeLists.txt":
+
+```
+cmake_minimum_required(VERSION 3.14)
+project(tui_app)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Загрузка ftxui из GitHub
+include(FetchContent)
+
+FetchContent_Declare(
+    ftxui
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
+    GIT_TAG v5.0.0
+)
+
+FetchContent_MakeAvailable(ftxui)
+
+# Создание исполняемого файла
+add_executable(${PROJECT_NAME} src/main.cpp)
+
+# Линковка с библиотеками ftxui
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE 
+    ftxui::dom
+    ftxui::component
+    ftxui::screen
+)
+```
+
+Программный код:
+
+```cpp
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/loop.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+
+using namespace ftxui;
+
+int main() {
+    auto screen = ScreenInteractive::TerminalOutput();
+
+    // Создание кнопки
+    auto button = Button("Нажми меня!", []{});
+
+    // Основной контейнер с кнопкой и текстом
+    auto component = Renderer(button, [&] {
+        return vbox({
+            text("Приложение с кнопкой"),
+            separator(),
+            button->Render(),
+            separator(),
+            text("Нажмите 'q' для выхода")
+        }) | border;
+    });
+
+    // Обработчик событий клавиатуры
+    auto event_handler = CatchEvent(component, [&](Event event) {
+        if (event.character() == "q" || event.character() == "Q") {
+            screen.ExitLoopClosure()();
+            return true;
+        }
+        return false;
+    });
+
+    // Запуск главного цикла
+    screen.Loop(event_handler);
+
+    return 0;
+}
+```
+
+Инструкции по сборке:
+
+```shell
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
 
 ## Результат
 
-Plug-in Koda отключен (но пока не удалён), буду продолжать использовать ИИ в традиционном режиме, через сайты агрегаторов.
+Plug-in Koda отключен, но я буду продолжать эксперименты с Koda используя мощные модели, в частности - Kimi K2.
