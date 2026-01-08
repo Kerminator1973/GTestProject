@@ -411,7 +411,7 @@ D:\Sources\KodaTUI\src\main.cpp(52,27): warning C4244: 'argument': conversion fr
 gauge_elements.push_back(
     vbox({
         text("Задача #" + std::to_string(task.id) + ":"),
-        gauge((double(task.percentage)) / 100.0),           // <-- Здесь я добавил деление на 100
+        gauge((float(task.percentage)) / 100),              // <-- Здесь я добавил деление на 100
         text(std::to_string(task.percentage) + "%")
     })
 );
