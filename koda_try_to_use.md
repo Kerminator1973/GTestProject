@@ -41,6 +41,8 @@ add_executable(ftxui_button_app src/main.cpp)
 target_link_libraries(ftxui_button_app PRIVATE ftxui::screen ftxui::dom ftxui::component)
 ```
 
+Вопрос к KODA: почему был выбран TAG v5.0.0 от 19 августа 2023 года, тогда как есть более актуальные TAG-и, в частности: v6.1.9 от 7 мая 2025 года?
+
 В первой попытке Koda предложил следующую реализацию "main.cpp":
 
 ```cpp
