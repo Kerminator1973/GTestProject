@@ -6,6 +6,7 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include <memory>
 
 using namespace ftxui;
 
@@ -20,15 +21,15 @@ int main() {
     };
 
     // Вектор активных задач и мьютекс для потокобезопасности
-    std::vector<ProgressTask> tasks;
+    std::vector<std::shared_ptr<ProgressTask>> tasks;
     std::mutex tasks_mutex;
     std::atomic<int> next_task_id{1};
 
     // Кнопка запуска новой задачи
     auto buttonRunGauge = Button("Запустить задачу", [&]{
-        // Создаём новую задачу
-        ProgressTask new_task;
-        new_task.id = next_task_id++;
+        // Создаём новую задачу через shared_ptr
+        auto new_task = std::make_shared<ProgressTask>();
+        new_task->id = next_task_id++;
         
         // Добавляем задачу в вектор (потокобезопасно)
         {
@@ -37,19 +38,13 @@ int main() {
         }
 
         // Запускаем задачу в отдельном потоке
-        std::thread([&, task_id = new_task.id]{
+        std::thread([&, task = new_task]{
             for (int i = 0; i <= 100; i++) {
                 // Обновляем прогресс в UI-потоке
-                screen.Post([&, task_id, i]{
-                    std::lock_guard<std::mutex> lock(tasks_mutex);
-                    for (auto& task : tasks) {
-                        if (task.id == task_id) {
-                            task.percentage = i;
-                            if (i == 100) {
-                                task.active = false;
-                            }
-                            break;
-                        }
+                screen.Post([&, task, i]{
+                    task->percentage = i;
+                    if (i == 100) {
+                        task->active = false;
                     }
                 });
                 
@@ -69,7 +64,9 @@ int main() {
         // Удаляем неактивные задачи
         tasks.erase(
             std::remove_if(tasks.begin(), tasks.end(), 
-                [](const ProgressTask& task) { return !task.active; }),
+                [](const std::shared_ptr<ProgressTask>& task) { 
+                    return !task->active; 
+                }),
             tasks.end()
         );
         
@@ -83,9 +80,9 @@ int main() {
         for (const auto& task : tasks) {
             gauge_elements.push_back(
                 vbox({
-                    text("Задача #" + std::to_string(task.id) + ":"),
-                    gauge((float(task.percentage)) / 100),
-                    text(std::to_string(task.percentage) + "%")
+                    text("Задача #" + std::to_string(task->id) + ":"),
+                    gauge((float(task->percentage)) / 100),
+                    text(std::to_string(task->percentage) + "%")
                 })
             );
             gauge_elements.push_back(separator());
@@ -97,12 +94,12 @@ int main() {
         return vbox(gauge_elements);
     });
 
-    // Основной контейнер с обеими кнопками
+    // Основной контейнер с кнопкой
     auto container = Container::Vertical({
         buttonRunGauge
     });
 
-    // Рендерер всего UI (БЕЗ захвата mutex!)
+    // Рендерер всего UI
     auto component = Renderer(container, [&]{
         std::vector<Element> elements = {
             text("Приложение с множественными задачами"),
