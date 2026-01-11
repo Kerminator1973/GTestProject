@@ -168,3 +168,20 @@ struct Item {
 ```
 
 Таким образом мы можем точно различать поля, которые не были заданы пользователем и соответствующим образом реагировать на них в коде.
+
+Ниже приведён helper, который умеет выводить в stream данные std::optional<>:
+
+```cpp
+std::ostream &operator<<(std::ostream &os, const Item & item) {
+    auto stringify_optional = [](const auto &optional) {
+        using optional_value_type = typename std::remove_cvref_t<decltype(optional>)>::value_type;
+        if constexpr (std::is_same_v<optional_value_type, std::string>) {
+            return optional ? *optional : "missing";
+        } else {
+            return optional ? std::to_string(*optional) : "missing";
+        }
+    }
+}
+```
+
+Пример использования: `os << stringify_optional(item.price);`
