@@ -1,0 +1,82 @@
+# Практическое использование constexpr
+
+Спецификатор `constexpr` указывает компилятору, что указанное значение должно быть вычислено во время компиляции. Этот спецификатор может быть применён к массиву и это значит, что каждый элемент известен компилятору (вычисляется на этапе компиляции) и может быть использован в константных выражениях (например, в шаблонных параметрах).
+
+Предположим, что для вычисления контрольной суммы нам необходима вспомогательная таблица CRC8, заполнение которой связано со значимым расходом вычислительных ресурсов. Мы бы не хотели формировать эту таблицу при каждом запуске приложения. Использование `constexpr` позволить вычислить содержимое таблицы на этапе компиляции, а при запуске приложения таблица всегда будет заполнена.
+
+Ниже приведён пример использования constexpr:
+
+```cpp
+#include <array>
+#include <cstdint>
+
+using U8 = std::uint8_t;
+
+// Полином CRC‑8 (например, 0x07 – CRC‑8‑ATM)
+constexpr U8 POLY = 0x07;
+
+// Генерация таблицы в compile‑time
+static constexpr std::array<U8, 256> generateTable() {
+    std::array<U8, 256> table{};
+
+    for (std::size_t i = 0; i < table.size(); ++i) {
+        U8 crc = static_cast<U8>(i);
+        for (int bit = 0; bit < 8; ++bit) {
+            if (crc & 0x80) {
+                crc = static_cast<U8>((crc << 1) ^ POLY);
+            } else {
+                crc <<= 1;
+            }
+        }
+        table[i] = crc;
+    }
+    return table;
+}
+
+// Таблица доступна как constexpr‑константа
+static constexpr std::array<U8, 256> CRC_TABLE = generateTable();
+
+// Пример функции вычисления CRC‑8 с использованием таблицы
+constexpr U8 crc8(const std::uint8_t* data, std::size_t length) {
+    U8 crc = 0x00;                     // начальное значение
+    for (std::size_t i = 0; i < length; ++i) {
+        crc = CRC_TABLE[crc ^ data[i]];
+    }
+    return crc;
+}
+
+// Тест‑пример (можно собрать как исполняемый файл)
+#include <iostream>
+
+int main() {
+    const std::uint8_t msg[] = {0x01, 0x02, 0x03, 0x04};
+    constexpr std::size_t len = sizeof(msg) / sizeof(msg[0]);
+
+    // Вычисление CRC‑8 в рантайме (таблица уже готова)
+    U8 result = crc8(msg, len);
+    std::cout << "CRC8 = 0x" << std::hex << static_cast<int>(result) << '\n';
+    return 0;
+}
+```
+
+Содержимое файла "CMakeLists.txt" приведено ниже:
+
+```
+cmake_minimum_required(VERSION 3.20)
+project(CRC8Example LANGUAGES CXX)
+
+# Требуем минимум C++20 для constexpr‑циклов
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable(crc8_example crc8_table.cpp)
+
+# При желании можно включить предупрежения
+if (MSVC)
+    target_compile_options(crc8_example PRIVATE /W4)
+else()
+    target_compile_options(crc8_example PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+```
+
+Полноценная поддержка constexpr, в том числе, инициализация массивов  (std::array) появилась в C++ 14.
