@@ -18,3 +18,54 @@ auto result = numbers
 Ленивые вычисления (_lazy evaluation_) — views::filter и views::transform не обрабатывают данные сразу при создании view. Вычисления происходят только в момент итерации в цикле for. Это экономит память и время, особенно на больших данных.
 
 Пример приложения можно посмотреть по [ссылке](https://github.com/Kerminator1973/GTestProject/tree/main/sourcesToTest/ranges).
+
+## Повышение производительности вычислений
+
+Чтобы избежать избыточных операций выделения памяти при выполнении операции transform() можно сначала посчитать, сколько объектов данных пройдут фильтрации и сразу выделить необходимый для хранения результатов объём данных. Для этого используется метод std::ranges::distance(). Пример кода:
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ranges>
+#include <algorithm>
+
+int main() {
+    std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // Фильтруем только чётные числа
+    auto even_view = numbers | std::views::filter([](int n) { return n % 2 == 0; });
+
+    // Заранее вычисляем количество элементов, которые пройдут фильтр
+    // std::ranges::distance обходит весь view — O(n) для non-sized ranges
+    auto count = std::ranges::distance(even_view);
+
+    std::vector<std::string> result;
+    result.reserve(count); // <-- preallocation: избегаем повторных аллокаций
+
+    // Теперь трансформируем и записываем в заранее выделенный буфер
+    std::ranges::transform(
+        even_view,
+        std::back_inserter(result),
+        [](int n) {
+            return "num_" + std::to_string(n);
+        }
+    );
+
+    std::cout << "Зарезервировано слотов: " << count << "\n";
+    std::cout << "Результат:\n";
+    for (const auto& s : result) {
+        std::cout << "  " << s << "\n";
+    }
+
+    return 0;
+}
+```
+
+Зачем нужен std::ranges::distance() перед reserve()? Обычный filter_view не является sized range — он не знает заранее, сколько элементов пройдёт фильтр. Поэтому вызов .size() для него недоступен. std::ranges::distance решает это за счёт явного прохода по диапазону.
+
+Цена вызова distance — это дополнительный O(n) проход по данным. Поэтому такой подход оправдан только когда операция transform дорогостоящая (например, выделяет память, как std::string), либо когда элементов очень много и вы хотите избежать реаллокаций вектора.
+
+Альтернатива без двойного прохода — использовать `std::ranges::to<std::vector>` (C++23), который сам управляет памятью.
+
+Если view является _sized range_ (например, transform_view без filter), то std::ranges::distance использует std::ranges::size и выполняется мгновенно.
