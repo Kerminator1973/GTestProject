@@ -101,7 +101,7 @@ generator<int> fibonacci() {
 ## C++23
 
 - Замена перегрузок &, const&, &&, const&& одной конструкцией
-- Замена CRTP (Curiously Recuring Template Pattern) на более вменяемую конструкцию
+- Замена CRTP (Curiously Recuring Template Pattern) на более вменяемую конструкцию. См. **deducting this**
 - Рекурсивные лямбды
 - std::print()
 - std::expected
