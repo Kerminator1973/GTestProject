@@ -27,6 +27,35 @@ class Derived : public Base<Derived> {
 };
 ```
 
+Пример из книги "Software Architecture with C++" by Adrian Ostrowski:
+
+```cpp
+template <typename ConcreteItem> class GlamorousItem {
+public:
+    void appear_in_full_glory() {
+        static_cast<ConcreteItem *>(this)->appera_in_full_glory();
+    }
+}
+```
+
+Производный класс:
+
+```cpp
+class PinkHeels : public GlamorousItem<PinkHeels> {
+public:
+    void appear_in_full_glory() {
+        std::cout << "Pink high heels suddenly appeared in all their beauty\n";
+    }
+}
+
+class GoldenWatch : public GlamorousItem<GoldenWatch> {
+public:
+    void appear_in_full_glory() {
+        std::cout << "Everyone wanted to watch this watch\n";
+    }
+}
+```
+
 ## Основные цели использования CRTP
 
 * **Статический полиморфизм**. Позволяет достичь полиморфизма на этапе компиляции — без накладных расходов на динамический полиморфизм (виртуальные функции и таблицы виртуальных методов).
