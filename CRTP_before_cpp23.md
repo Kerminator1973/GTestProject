@@ -56,6 +56,25 @@ public:
 }
 ```
 
+Как можно использовать CRTP для хранения объектов с полиморфизмом? В книге "Software Architecture with C++" приводится следующий пример:
+
+```cpp
+template <typename... Args>
+using PreciousItems = std::tuple<GlamorouseItem<Args>...>;
+
+auto glamorous_items = PreciousItems<PinkHeels, GoldenWatch>{};
+```
+
+Если у нас есть подобный контейнер, то мы можем вызвать интересующую нас функцию:
+
+```cpp
+std::apply(
+    []<typename... T>(GlamorousItem<T>... items) {
+        (items.appear_in_full_glory(), ...); }, // Вызов функции
+        glamorous_items     // Контейнер
+);
+```
+
 ## Основные цели использования CRTP
 
 * **Статический полиморфизм**. Позволяет достичь полиморфизма на этапе компиляции — без накладных расходов на динамический полиморфизм (виртуальные функции и таблицы виртуальных методов).
