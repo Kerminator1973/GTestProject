@@ -50,7 +50,7 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 
 Я устанавливал утилиту через snap и в моём случае она называлась `codechecker`.
 
-В общем случае, моежт потребоваться установить checkers:
+В общем случае, может потребоваться установить checkers:
 
 ```shell
 sudo apt install clang-tidy
@@ -78,7 +78,7 @@ CodeChecker analyze ./compile_commands.json --analyzers clangsa --enable=alpha -
 codechecker parse --export html --output ./reports_html ./reports
 ```
 
-Однако, в моём случае, вывод был абсолютно беполезным, т.к. система былол найдено несколько тысяч замечаний к The Boost Library, а не к моему коду.
+Однако, в моём случае, вывод был абсолютно беполезным, т.к. системой было найдено несколько тысяч замечаний к The Boost Library, а не к моему коду.
 
 Команда `--exclude */boost/*` не была принята утилитой. Запрос `codechecker analyze --help`, к сожалению, не дал четких подсказок, как исключить из анализа the Boost library.
 
