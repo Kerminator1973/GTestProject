@@ -24,6 +24,16 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ```
 
+Или можно установить свойства групповой операцией, например:
+
+``` cmake
+set_target_properties(dsliportable PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS NO
+)
+```
+
 Выбор стандарта C++ может быть важной задачей. Если выбрать C++ 11, то можно использовать специализированные компиляторы, надёжно работающие на устаревающих платформах. Однако, актуальные стандарты C++ предоставляют мощные инструментальные возможности, например, в C++ 17 появилась поддержка типов: std::string_view, std::optional, std::variant.
 
 Указываем список файлов, участвующих в сборке проекта можно используя директиву add_executable:
@@ -74,6 +84,42 @@ message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 ``` cmake
 include_directories("${PROJECT_SOURCE_DIR}/include")
 ```
+
+### Ключевые слова PRIVATE, PUBLIC и INTERFACE
+
+Ключевые слова PRIVATE, PUBLIC и INTERFACE в CMake управляют тем, как свойства (например, пути к заголовочным файлам, библиотеки для линковки, флаги компиляции) распространяются между целями (targets) при использовании команд target_link_libraries, target_include_directories, target_compile_definitions и подобных.
+
+**PRIVATE**: свойство используется только самой целью и не передаётся тем, кто ссылается на неё:
+
+```cmake
+add_library(utils STATIC utils.cpp)
+
+target_include_directories(utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/internal)
+```
+
+Цель utils будет видеть заголовки из `internal/`, но любой исполняемый файл или библиотека, которые подключат utils, — не будут. Это инкапсуляция: внутренние детали реализации скрыты от потребителей.
+
+**PUBLIC**: свойство используется и самой целью, и всеми, кто на неё ссылается. Применяется, когда заголовки библиотеки в своём публичном API включают файлы из каких-то директорий или требуют определённых флагов.
+
+``` cmake
+add_library(math STATIC math.cpp)
+
+target_include_directories(math PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(math PUBLIC boost::system)
+```
+
+Здесь и сама math, и любой потребитель (target_link_libraries(my_app math)) получат путь `include/`, а также получать указание на необходимость выполнить подключение к каждому из них библиотеки boost::system.
+
+**INTERFACE**: свойство не используется самой целью, но передаётся всем, кто на неё ссылается. Это классический случай для header-only библиотек (у которых нет своих единиц компиляции) или для целей-интерфейсов, задающих требования.
+
+``` cmake
+add_library(header_only INTERFACE)
+
+target_include_directories(header_only INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_definitions(header_only INTERFACE USE_FANCY_MACRO=1)
+```
+
+Сама header_only ничего не компилирует, но любой, кто сделает target_link_libraries(my_app header_only), получит и путь к заголовкам, и определение макроса USE_FANCY_MACRO.
 
 ## Подключение библиотек Boost
 
