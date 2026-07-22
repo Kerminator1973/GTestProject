@@ -177,6 +177,39 @@ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_include_directories( ${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 ```
 
+## Использование менеджеров пакетов
+
+В случае, если проекту необходимы для сборки внешние компоненты, то чаще всего используется декларация `find_package()`. CMake ищет соответветствующую библиотеку на машине и если находит, то добавляет необходимые параметры конфигурации и использует её для сборки.
+
+Однако библиотека может быть не установлена на машине. В этом случае поможет скрипт `FetchContent`, который скачает библиотеку и включит в сборку. Пример скрипта:
+
+``` cmake
+cmake_minimum_required(VERSION 3.14)
+project(MyProject)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG        3.3.8               # можно указать тег, ветку или коммит
+)
+
+# Скачивает и конфигурирует библиотеку
+FetchContent_MakeAvailable(glfw)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE glfw)
+```
+
+Заметим, что этот вариант предполагает, что в загруженном репозитарии будет находится файл "CMakeLists.txt".
+
+Вместе с тем, во многих ситуациях наиболее рациональным может быть использование менеджеров пакетов: [vcpkg](https://vcpkg.io/en/), или [Conan](https://conan.io/).
+
+В данном репозитарии находится [документ](./vcpkg.md), в котором описан пример использования vcpkg для управления пакетами.
+
+Рекомендация использовать Conan есть в книге "Software Architecture with C++" by Adrian Ostrowski and Piotr Gaczkowski.
+
 ## Использование plug-ins CMake для Visual Studio Code
 
 Наиболее популярные plug-ins разработаны Microsoft (**CMake Tools**), **twxs** и **Jose Torres** и содержат инструменты IntelliSense для написания скриптов сборки CMakeLists.txt.
