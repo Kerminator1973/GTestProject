@@ -280,6 +280,12 @@ class MyAppConan(ConanFile):
 
 Conan умеет работать с CMake, Meson, autotools, make, ninja и т.д.
 
+Для полной сборки проекта используется команда create:
+
+```shell
+conan create .
+```
+
 ## Использование plug-ins CMake для Visual Studio Code
 
 Наиболее популярные plug-ins разработаны Microsoft (**CMake Tools**), **twxs** и **Jose Torres** и содержат инструменты IntelliSense для написания скриптов сборки CMakeLists.txt.
