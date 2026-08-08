@@ -256,6 +256,30 @@ class MyLibConan(ConanFile):
         cmake.install()
 ```
 
+Чтобы указать необходимые зависимости необходимо проинициализировать переменную **requires**:
+
+```py
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+
+class MyAppConan(ConanFile):
+    name = "my_app"
+    version = "1.0.0"
+
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False]}
+    default_options = {"shared": False}
+
+    # Зависимости: какие пакеты нужны для сборки и работы
+    requires = [
+        "fmt/10.1.0",          # форматирование строк
+        "spdlog/1.12.0",       # логирование
+        "nlohmann_json/3.11.3" # работа с JSON
+    ]
+```
+
+Conan умеет работать с CMake, Meson, autotools, make, ninja и т.д.
+
 ## Использование plug-ins CMake для Visual Studio Code
 
 Наиболее популярные plug-ins разработаны Microsoft (**CMake Tools**), **twxs** и **Jose Torres** и содержат инструменты IntelliSense для написания скриптов сборки CMakeLists.txt.
