@@ -214,9 +214,47 @@ target_link_libraries(my_app PRIVATE glfw)
 
 Вместе с тем, во многих ситуациях наиболее рациональным может быть использование менеджеров пакетов: [vcpkg](https://vcpkg.io/en/), или [Conan](https://conan.io/). Conan позволяет скачать со своего сервера предварительно собранные пакеты для указанной платформы, либо скачать исходные тексты и собрать их. Собранные пакеты после этого становятся доступны в CMake и их можно использовать через директиву `find_package()`.
 
+В данном репозитарии находится [документ](./vcpkg.md), в котором описан пример использования vcpkg для управления пакетами.
+
 Рекомендация использовать Conan есть в книге "Software Architecture with C++" by Adrian Ostrowski and Piotr Gaczkowski.
 
-В данном репозитарии находится [документ](./vcpkg.md), в котором описан пример использования vcpkg для управления пакетами.
+Conan — это менеджер зависимостей и система сборки для C/C++ (и частично других языков). Для описания сборки проекта используется файл "conanfile.py", который содержит код на Python.
+
+Важные нюансы, связанные с использованием Conan:
+
+- Не нужно писать всю сборку на Python: Python только "оркестрирует" процесс — запускает CMake/make/ninja, передаёт им правильные флаги, собирает переменные окружения, копирует файлы
+- Изоляция окружения: Conan управляет папками сборки и установки, чтобы разные конфигурации не мешали друг другу
+- Переиспользуемость: один conanfile.py может собирать библиотеку под разные компиляторы и платформы, а различия реализуются через settings и options
+
+Пример "conanfile.py", который загружает репозитарий и вызывает CMake для генерации скрипта сборки и, непосредственно, сборки приложения:
+
+```py
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+
+class MyLibConan(ConanFile):
+    name = "mylib"
+    version = "1.0.0"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False]}
+    default_options = {"shared": False}
+
+    def source(self):
+        self.run("git clone https://github.com/example/mylib.git .")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+```
 
 ## Использование plug-ins CMake для Visual Studio Code
 
