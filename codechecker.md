@@ -4,9 +4,7 @@
 
 Официальная документация по [продукту](https://codechecker.readthedocs.io/en/latest/).
 
-Позволяет запускать различные анализаторы кода C/C++ под Linux и macOS: Clang-Tidy, Clang Static Analyzer, Cppcheck и GCC Static Analyzer — в любой комбинации. На официальном сайте есть ссылка на 
-
-Code Checker - это Python-пакет.
+Позволяет запускать различные анализаторы кода C/C++ под Linux и macOS: Clang-Tidy, Clang Static Analyzer, Cppcheck и GCC Static Analyzer — в любой комбинации. На официальном сайте есть ссылка на Code Checker - это Python-пакет.
 
 Варианты установки:
 
@@ -150,3 +148,5 @@ Dependabot поддерживает экосистемы следующих яз
 - C++: vcpkg
 
 Также существовали решения Renovate (www.mend.io) и Greenkeeper, которые также осуществляли контроль зависимостей. Однако, похоже, что они не пережили эпоху роста ИИ. Greenkeeper трансформировался во что-то называемое Snyk Code. Живой альтернативой этим решениям является [aikido.dev](https://www.aikido.dev/)
+
+Можно попробовать также расмотреть такие инструменты статического анализа кода, как: LGTM, Flawfinder.
